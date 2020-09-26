@@ -12,13 +12,17 @@ version = "0.0.1-SNAPSHOT"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 repositories {
-	mavenCentral()
+	jcenter()
 }
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+	implementation("org.jetbrains.exposed", "exposed-core", "0.24.1")
+	implementation("org.jetbrains.exposed", "exposed-dao", "0.24.1")
+	implementation("org.jetbrains.exposed", "exposed-jdbc", "0.24.1")
+	implementation("com.h2database:h2:1.4.199")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
 	}
