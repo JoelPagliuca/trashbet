@@ -6,12 +6,19 @@ import io.ktor.routing.*
 import io.ktor.server.netty.Netty
 import io.ktor.server.engine.embeddedServer
 
-fun main(args: Array<String>) {
-    embeddedServer(Netty, 8080) { 
-        routing {
-            get("/") {
-                call.respondText("Hello, world!")
-            }
+fun Application.myapp() {
+    routing {
+        get("/") {
+            call.respondText("Now with reload")
         }
-    }.start(wait=true)
+    }
+}
+
+fun main(args: Array<String>) {
+    embeddedServer(
+        Netty,
+        watchPaths = listOf("trashbet"),
+        module = Application::myapp,
+        port = 8080
+    ).start(wait=true)
 }
