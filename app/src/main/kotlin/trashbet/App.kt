@@ -5,13 +5,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import io.ktor.application.*
 import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
-import io.ktor.response.*
 import io.ktor.routing.*
-import io.ktor.request.receive
 import io.ktor.serialization.*
 import io.ktor.server.netty.Netty
 import io.ktor.server.engine.embeddedServer
-import java.util.UUID
 import kotlinx.serialization.json.Json
 
 
@@ -38,24 +35,7 @@ fun Application.myapp() {
     }
 
     install(Routing) {
-        route("/user") {
-            get("/") {
-                val users = transaction {
-                    Users.selectAll().map{ Users.toUser(it) }
-                }
-                call.respond(users)
-            }
-    
-            post("/") {
-                val user = call.receive<User>()
-                transaction {
-                    Users.insert { 
-                        it[name] = user.name
-                    }
-                }
-                call.respond(user)
-            }
-        }
+        controllers()
     }
 }
 
