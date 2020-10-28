@@ -1,3 +1,5 @@
+@file:Suppress("EXPERIMENTAL_API_USAGE", "unused")
+
 package trashbet
 
 import kotlinx.serialization.*
@@ -15,19 +17,26 @@ data class User(@Serializable(with = UUIDSerializer::class) val id: UUID? = null
 
 object Users: UUIDTable() {
     val name = varchar("name", 255)
+    val amount = integer("amount")
 
     fun toUser(row: ResultRow): User = User(
-        id = row[Users.id].value,
-        name = row[Users.name],
+        id = row[id].value,
+        name = row[name],
     )
 }
 
 object Bets: UUIDTable() {
-    val prediction = text("description")
-    val amount = integer("amount")
+    val description = text("description")
     val complete = bool("complete")
 }
 
+object Wager: UUIDTable() {
+    val amount = integer("amount")
+    val user = reference("user", Users)
+    val bet = reference("bet", Bets)
+}
+
+@ExperimentalSerializationApi
 @Serializer(forClass = UUID::class)
     object UUIDSerializer : KSerializer<UUID> {
         override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("UUID", PrimitiveKind.STRING)

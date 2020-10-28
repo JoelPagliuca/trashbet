@@ -13,7 +13,7 @@ import kotlinx.serialization.json.Json
 
 
 fun Application.myapp() {
-    Database.connect("jdbc:h2:mem:regular;DB_CLOSE_DELAY=-1;", "org.h2.Driver")
+    Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;", "org.h2.Driver")
     
     transaction {
         SchemaUtils.create(Users)
@@ -21,12 +21,15 @@ fun Application.myapp() {
 
         Users.insert { 
             it[name] = "John"
+            it[amount] = 20
         }
         Users.insert { 
             it[name] = "Jack"
+            it[amount] = 20
         }
         Users.insert { 
             it[name] = "Jill"
+            it[amount] = 20
         }
     }
 
