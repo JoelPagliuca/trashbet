@@ -13,7 +13,11 @@ import org.jetbrains.exposed.sql.ResultRow
 import java.util.UUID
 
 @Serializable
-data class User(@Serializable(with = UUIDSerializer::class) val id: UUID? = null, val name: String)
+data class User(
+        @Serializable(with = UUIDSerializer::class) val id: UUID? = null,
+        val name: String,
+        val amount: Int,
+)
 
 object Users: UUIDTable() {
     val name = varchar("name", 255)
@@ -22,6 +26,7 @@ object Users: UUIDTable() {
     fun toUser(row: ResultRow): User = User(
         id = row[id].value,
         name = row[name],
+        amount = row[amount],
     )
 }
 
@@ -32,6 +37,7 @@ object Bets: UUIDTable() {
 
 object Wager: UUIDTable() {
     val amount = integer("amount")
+
     val user = reference("user", Users)
     val bet = reference("bet", Bets)
 }

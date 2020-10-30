@@ -33,10 +33,15 @@ dependencies {
     implementation("com.h2database:h2:1.4.199")
 
     // test
-    testImplementation(kotlin("test"))
-    testImplementation(kotlin("test-junit"))
+    testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
 }
 
 application {
     mainClass.set("trashbet.AppKt")
+}
+
+tasks {
+    test {
+        environment("APP_SEED", "false")
+    }
 }
