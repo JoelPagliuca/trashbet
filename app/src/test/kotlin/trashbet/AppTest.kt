@@ -4,15 +4,13 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import kotlin.test.*
 
 class AppTest {
     @Test
@@ -24,12 +22,24 @@ class AppTest {
 
     @Test
     fun testUsers() = withTestApplication(Application::main) {
+        // there are no users
         with(handleRequest(HttpMethod.Get, "/user")) {
-            println(response.content)
             assertNotNull(response.content)
             val users = Json.decodeFromString<List<User>>(response.content ?: "")
             assertEquals(0, users.size)
         }
+        val user1 = User(name="joel", amount=11)
+        // make a user
+        with(handleRequest(HttpMethod.Post, "/user", setup={
+            setBody(Json.encodeToString(user1))
+            addHeader("Content-Type", "application/json")
+        })) {
+            assertNotNull(response.content)
+            val user = Json.decodeFromString<User>(response.content ?: "")
+            assertEquals(11, user.amount)
+            assertNotNull(user.id)
+        }
+        Unit
     }
 
     @BeforeTest
