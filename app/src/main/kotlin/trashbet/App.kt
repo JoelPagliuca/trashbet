@@ -6,18 +6,24 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.routing.*
 import io.ktor.serialization.*
+import io.ktor.server.engine.*
 import io.ktor.server.netty.Netty
-import io.ktor.server.engine.embeddedServer
 import kotlinx.serialization.json.Json
 
 
 fun Application.main() {
     Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;", "org.h2.Driver")
 
-    val seed = System.getenv("APP_SEED") ?: "true"
+    @Suppress("EXPERIMENTAL_API_USAGE")
+    val deployment_environment = environment.config.property("ktor.deployment.environment").getString()
+    println(deployment_environment)
 
-    if (seed.toBoolean()) {
-        seedData()
+    when (deployment_environment) {
+        "testing" -> Unit
+        "development" -> {
+            seedData()
+        }
+        "production" -> Unit
     }
 
     install(ContentNegotiation) { 
@@ -31,10 +37,5 @@ fun Application.main() {
 
 @Suppress("UNUSED_PARAMETER")
 fun main(args: Array<String>) {
-    embeddedServer(
-        Netty,
-        watchPaths = listOf("trashbet"),
-        module = Application::main,
-        port = 8080
-    ).start(wait=true)
+    embeddedServer(Netty, commandLineEnvironment(args)).start(wait=true)
 }
