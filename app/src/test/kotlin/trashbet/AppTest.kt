@@ -23,7 +23,8 @@ class AppTest {
     @Test
     fun testUsers() = withTestApplication(Application::main) {
         // there are no users
-        with(handleRequest(HttpMethod.Get, "/user")) {
+        with(handleRequest(HttpMethod.Get, "/user", setup={addHeader("Authorization", "Basic am9lbDozMA==")})) {
+            println(response.status())
             assertNotNull(response.content)
             val users = Json.decodeFromString<List<User>>(response.content ?: "")
             assertEquals(0, users.size)
@@ -33,6 +34,7 @@ class AppTest {
         with(handleRequest(HttpMethod.Post, "/user", setup={
             setBody(Json.encodeToString(user1))
             addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic am9lbDozMA==")
         })) {
             assertNotNull(response.content)
             val user = Json.decodeFromString<User>(response.content ?: "")

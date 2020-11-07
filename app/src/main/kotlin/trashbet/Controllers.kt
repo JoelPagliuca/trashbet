@@ -10,12 +10,6 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Route.controllers() {
-    route("/") {
-        get("/health") {
-            call.respondText("healthy")
-        }
-    }
-
     route("/user") {
         get("/") {
             val users = transaction {
@@ -45,5 +39,13 @@ fun Route.controllers() {
 
     route("/bet") {
 
+    }
+}
+
+fun Route.unauthedControllers() {
+    route("/") {
+        get("/health") {
+            call.respondText("healthy")
+        }
     }
 }
