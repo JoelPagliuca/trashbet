@@ -33,6 +33,9 @@ dependencies {
     implementation("org.jetbrains.exposed", "exposed-jdbc", exposed_version)
     implementation("com.h2database:h2:1.4.199")
 
+    // bcrypt
+    implementation("org.mindrot", "jbcrypt", "0.4")
+
     // test
     testImplementation("io.ktor:ktor-server-test-host:$ktor_version")
 }

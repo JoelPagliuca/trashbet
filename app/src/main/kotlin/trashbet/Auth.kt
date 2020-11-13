@@ -2,8 +2,6 @@ package trashbet
 
 import io.ktor.application.*
 import io.ktor.auth.*
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
 import java.lang.NumberFormatException
 import java.util.*
 
@@ -28,21 +26,12 @@ fun Application.installAuth() {
         basic("real") {
             realm = "ktor"
             validate { credentials ->
-                try {
-                    val user = transaction {
-                        Users.select {
-                            // not real auth yet, still thinking
-                            (Users.name eq credentials.name)
-                        }.mapNotNull {
-                            Users.toUser(it)
-                        }.single()
-                    }
+                val user = UserService().loginUser(credentials.name, credentials.password)
+                if (user != null) {
                     UserPrincipal(user)
+                } else {
+                    null
                 }
-                catch (e: Exception) {
-                    Unit
-                }
-                null
             }
         }
     }

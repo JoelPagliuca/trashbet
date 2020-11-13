@@ -1,51 +1,41 @@
 package trashbet
 
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
 
-fun Route.controllers() {
+fun Route.userController(userService: UserService) {
     route("/user") {
         get("/") {
-            val users = transaction {
-                Users.selectAll().map{ Users.toUser(it) }
-            }
+            val users = userService.getAllUsers()
             call.respond(users)
         }
 
-        post("/") {
-            var user = call.receive<User>()
-            val id = transaction {
-                Users.insert {
-                    it[name] = user.name
-                    it[amount] = user.amount
-                }
-            } get Users.id
-            user = transaction {
-                Users.select {
-                    (Users.id eq id)
-                }.mapNotNull {
-                    Users.toUser(it)
-                }.single()
-            }
-            call.respond(user)
+        get("/me") {
+            val principal = call.authentication.principal<UserPrincipal>()
+            principal?.user?.let { u -> call.respond(u) }
         }
-    }
-
-    route("/bet") {
-
     }
 }
 
-fun Route.unauthedControllers() {
+fun Route.betController() {
+    route("/bet") {
+    }
+}
+
+fun Route.unauthedControllers(userService: UserService) {
     route("/") {
         get("/health") {
             call.respondText("healthy")
+        }
+
+        post("/register") {
+            val registration = call.receive<UserRegistration>()
+            var user = User(name=registration.username, amount=0)
+            user = userService.addUser(user, registration.password)
+            call.respond(user)
         }
     }
 }

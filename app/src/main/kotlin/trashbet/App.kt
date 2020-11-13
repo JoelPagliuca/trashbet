@@ -18,7 +18,6 @@ fun Application.main() {
     @Suppress("EXPERIMENTAL_API_USAGE")
     val deploymentEnvironment = environment.config.property("ktor.deployment.environment").getString()
     var authenticationScheme = "real"
-    println(deploymentEnvironment)
 
     when (deploymentEnvironment) {
         "test" -> {
@@ -36,10 +35,13 @@ fun Application.main() {
         register(ContentType.Application.Json, SerializationConverter(Json { prettyPrint = true }))
     }
 
+    val userService = UserService()
+
     install(Routing) {
-        unauthedControllers()
+        unauthedControllers(userService)
         authenticate(authenticationScheme) {
-            controllers()
+            userController(userService)
+            betController()
         }
     }
 }

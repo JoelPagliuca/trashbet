@@ -4,11 +4,11 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.deleteAll
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.test.*
 
@@ -22,23 +22,27 @@ class AppTest {
 
     @Test
     fun testUsers() = withTestApplication(Application::main) {
-        // there are no users
         with(handleRequest(HttpMethod.Get, "/user", setup={addHeader("Authorization", "Basic am9lbDozMA==")})) {
-            println(response.status())
             assertNotNull(response.content)
             val users = Json.decodeFromString<List<User>>(response.content ?: "")
-            assertEquals(0, users.size)
+            assertEquals(1, users.size)
         }
-        val user1 = User(name="joel", amount=11)
+        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic am9lbDozMA==")})) {
+            val user = Json.decodeFromString<User>(response.content ?: "")
+            assertEquals(user.name, "joel")
+        }
+    }
+
+    @Test
+    fun testRegistration() = withTestApplication(Application::main) {
         // make a user
-        with(handleRequest(HttpMethod.Post, "/user", setup={
-            setBody(Json.encodeToString(user1))
+        with(handleRequest(HttpMethod.Post, "/register", setup = {
+            setBody("{\"username\":\"joel\", \"password\":\"joel\"}")
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic am9lbDozMA==")
         })) {
             assertNotNull(response.content)
             val user = Json.decodeFromString<User>(response.content ?: "")
-            assertEquals(11, user.amount)
+            assertNotNull(user.amount)
             assertNotNull(user.id)
         }
         Unit
@@ -51,6 +55,12 @@ class AppTest {
             SchemaUtils.create(Users)
             SchemaUtils.create(Bets)
             Users.deleteAll()
+
+            Users.insert {
+                it[name] = "Jack"
+                it[amount] = 20
+                it[passwordHash] = UserService().hashPassword("Jack")
+            }
         }
     }
 }

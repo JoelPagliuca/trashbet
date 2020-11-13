@@ -19,9 +19,16 @@ data class User(
         val amount: Int,
 )
 
+@Serializable
+data class UserRegistration(
+        val username: String,
+        val password: String,
+)
+
 object Users: UUIDTable() {
     val name = varchar("name", 255)
     val amount = integer("amount")
+    val passwordHash = varchar("password", 255)
 
     fun toUser(row: ResultRow): User = User(
         id = row[id].value,
