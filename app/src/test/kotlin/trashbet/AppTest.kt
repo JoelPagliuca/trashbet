@@ -3,6 +3,7 @@ package trashbet
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.sql.Database
@@ -48,6 +49,20 @@ class AppTest {
         Unit
     }
 
+    @Test
+    fun testBets() = withTestApplication(Application::main) {
+        with(handleRequest(HttpMethod.Post, "/bet", setup = {
+            setBody(Json.encodeToString(Bet(description = "test bet", complete = false)))
+            addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic am9lbDow")
+        })) {
+            assertNotNull(response.content)
+            val bet = Json.decodeFromString<Bet>(response.content ?: "")
+            assertNotNull(bet.id)
+            assertFalse(bet.complete)
+        }
+    }
+
     @BeforeTest
     fun before() {
         Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;", "org.h2.Driver")
@@ -60,6 +75,11 @@ class AppTest {
                 it[name] = "Jack"
                 it[amount] = 20
                 it[passwordHash] = UserService().hashPassword("Jack")
+            }
+
+            Bets.insert {
+                it[description] = "test bet"
+                it[complete] = false
             }
         }
     }

@@ -31,22 +31,56 @@ object Users: UUIDTable() {
     val passwordHash = varchar("password", 255)
 
     fun toUser(row: ResultRow): User = User(
-        id = row[id].value,
-        name = row[name],
-        amount = row[amount],
+            id = row[id].value,
+            name = row[name],
+            amount = row[amount],
     )
 }
+
+@Serializable
+data class Bet(
+        @Serializable(with = UUIDSerializer::class) val id: UUID? = null,
+        val description: String,
+        val complete: Boolean,
+        val outcome: Boolean? = null,
+)
 
 object Bets: UUIDTable() {
     val description = text("description")
     val complete = bool("complete")
+    val outcome = bool("outcome").nullable()
+
+    fun toBet(row: ResultRow): Bet = Bet(
+            id = row[id].value,
+            description = row[description],
+            complete = row[complete],
+            outcome = row[outcome],
+    )
 }
 
-object Wager: UUIDTable() {
+@Serializable
+data class Wager(
+        @Serializable(with = UUIDSerializer::class) val id: UUID? = null,
+        val amount: Int,
+        val outcome: Boolean,
+        @Serializable(with = UUIDSerializer::class) val userId: UUID,
+        @Serializable(with = UUIDSerializer::class) val betId: UUID,
+)
+
+object Wagers: UUIDTable() {
     val amount = integer("amount")
+    val outcome = bool("outcome")
 
     val user = reference("user", Users)
     val bet = reference("bet", Bets)
+
+    fun toWager(row: ResultRow): Wager = Wager(
+            id = row[id].value,
+            amount = row[amount],
+            outcome = row[outcome],
+            userId = row[user].value,
+            betId = row[bet].value,
+    )
 }
 
 @ExperimentalSerializationApi

@@ -9,6 +9,7 @@ fun seedData() {
         val userService = UserService()
         SchemaUtils.create(Users)
         SchemaUtils.create(Bets)
+        SchemaUtils.create(Wagers)
 
         Users.insert {
             it[name] = "John"
