@@ -6,10 +6,6 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
 
 fun Route.userController(userService: UserService) {
     route("/user") {
@@ -25,32 +21,17 @@ fun Route.userController(userService: UserService) {
     }
 }
 
-fun Route.betController() {
+fun Route.betController(betService: BetService) {
     route("/bet") {
         get("/") {
-            val bets = transaction {
-                Bets.selectAll().map{ Bets.toBet(it) }
-            }
+            val bets = betService.getAllBets()
             call.respond(bets)
         }
 
         post("/") {
-            val bet = call.receive<Bet>()
-            val id = transaction {
-                Bets.insert {
-                    it[description] = bet.description
-                    it[complete] = false
-                } get Bets.id
-            }
-            val output = transaction {
-                Bets.select {
-                    (Bets.id eq id)
-                }.mapNotNull {
-                    Bets.toBet(it)
-                }.singleOrNull()
-            }
-            if (output == null) call.respond(HttpStatusCode.BadRequest)
-            else call.respond(HttpStatusCode.Created, output)
+            var bet = call.receive<Bet>()
+            bet = betService.addBet(bet)
+            call.respond(HttpStatusCode.Created, bet)
         }
     }
 }

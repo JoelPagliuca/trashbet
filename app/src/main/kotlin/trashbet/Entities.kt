@@ -29,12 +29,6 @@ object Users: UUIDTable() {
     val name = varchar("name", 255)
     val amount = integer("amount")
     val passwordHash = varchar("password", 255)
-
-    fun toUser(row: ResultRow): User = User(
-            id = row[id].value,
-            name = row[name],
-            amount = row[amount],
-    )
 }
 
 @Serializable
@@ -49,13 +43,6 @@ object Bets: UUIDTable() {
     val description = text("description")
     val complete = bool("complete")
     val outcome = bool("outcome").nullable()
-
-    fun toBet(row: ResultRow): Bet = Bet(
-            id = row[id].value,
-            description = row[description],
-            complete = row[complete],
-            outcome = row[outcome],
-    )
 }
 
 @Serializable

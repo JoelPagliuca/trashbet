@@ -36,12 +36,13 @@ fun Application.main() {
     }
 
     val userService = UserService()
+    val betService = BetService()
 
     install(Routing) {
         unauthedControllers(userService)
         authenticate(authenticationScheme) {
             userController(userService)
-            betController()
+            betController(betService)
         }
     }
 }
