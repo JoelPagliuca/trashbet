@@ -13,7 +13,7 @@ class UserService {
         Users.selectAll().map{ toUser(it) }
     }
 
-    private fun getUserByName(name: String): User? = transaction {
+    fun getUserByName(name: String): User? = transaction {
         Users.select {
             (Users.name eq name)
         }.mapNotNull {
@@ -94,3 +94,53 @@ class BetService {
     )
 }
 
+class WagerService {
+    fun getWagersByBetId(betId: UUID): List<Wager> = transaction {
+        Wagers.select {
+            (Wagers.bet eq betId)
+        }.mapNotNull {
+            toWager(it)
+        }
+    }
+
+    private fun getWagerById(id: UUID): Wager? = transaction {
+        Wagers.select {
+            (Wagers.id eq id)
+        }.mapNotNull {
+            toWager(it)
+        }.singleOrNull()
+    }
+
+    fun addWagerForUser(wager: Wager, user_: User): Wager {
+        // TODO check user amount
+        val userId = transaction {
+            Users.select {
+                (Users.id eq user_.id!!)
+            }.single()[Users.id]
+        }
+        val betId = transaction {
+            Bets.select {
+                (Bets.id eq wager.betId)
+                (Bets.complete eq false)
+            }.single()[Bets.id]
+        }
+        val wagerId = transaction {
+            Wagers.insert {
+                it[amount] = wager.amount
+                it[outcome] = wager.outcome
+                it[user] = userId
+                it[bet] = betId
+            } get Wagers.id
+        }
+        // TODO deduct wager amount
+        return getWagerById(wagerId.value)!!
+    }
+
+    private fun toWager(row: ResultRow): Wager = Wager(
+            id = row[Wagers.id].value,
+            amount = row[Wagers.amount],
+            outcome = row[Wagers.outcome],
+            userId = row[Wagers.user].value,
+            betId = row[Wagers.bet].value,
+    )
+}

@@ -9,7 +9,6 @@ import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.descriptors.SerialDescriptor
 import org.jetbrains.exposed.dao.id.UUIDTable
-import org.jetbrains.exposed.sql.ResultRow
 import java.util.UUID
 
 @Serializable
@@ -60,14 +59,6 @@ object Wagers: UUIDTable() {
 
     val user = reference("user", Users)
     val bet = reference("bet", Bets)
-
-    fun toWager(row: ResultRow): Wager = Wager(
-            id = row[id].value,
-            amount = row[amount],
-            outcome = row[outcome],
-            userId = row[user].value,
-            betId = row[bet].value,
-    )
 }
 
 @ExperimentalSerializationApi
