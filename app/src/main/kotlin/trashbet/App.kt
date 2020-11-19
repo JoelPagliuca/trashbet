@@ -3,7 +3,7 @@ package trashbet
 import org.jetbrains.exposed.sql.*
 import io.ktor.application.*
 import io.ktor.auth.*
-import io.ktor.features.ContentNegotiation
+import io.ktor.features.*
 import io.ktor.http.ContentType
 import io.ktor.routing.*
 import io.ktor.serialization.*
@@ -30,7 +30,11 @@ fun Application.main() {
     }
 
     install(Authentication) {
-        installAuth()
+        registerAuth()
+    }
+
+    install(StatusPages) {
+        registerExceptionHandling()
     }
 
     install(ContentNegotiation) { 

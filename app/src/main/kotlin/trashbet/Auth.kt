@@ -4,7 +4,7 @@ import io.ktor.auth.*
 
 data class UserPrincipal(val user: User) : Principal
 
-fun Authentication.Configuration.installAuth() {
+fun Authentication.Configuration.registerAuth() {
     basic("mock") {
         realm = "ktor"
         validate { credentials ->

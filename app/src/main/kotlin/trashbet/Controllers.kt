@@ -6,6 +6,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import java.util.*
 
 fun Route.userController(userService: UserService) {
     route("/user") {
@@ -21,7 +22,7 @@ fun Route.userController(userService: UserService) {
     }
 }
 
-fun Route.betController(betService: BetService) {
+fun Route.betController(betService: BetService, wagerService: WagerService) {
     route("/bet") {
         get("/") {
             val bets = betService.getAllBets()
@@ -34,7 +35,30 @@ fun Route.betController(betService: BetService) {
             call.respond(HttpStatusCode.Created, bet)
         }
     }
+
+    route("/bet/{betId}/wager") {
+        get("/") {
+            val betId = call.parameters["betId"]!!
+            val betUUID = UUID.fromString(betId)
+            val wagers = wagerService.getWagersByBetId(betUUID)
+            call.respond(wagers)
+        }
+
+        post("/") {
+            val betId = call.parameters["betId"]!!
+            val betUUID = UUID.fromString(betId)
+            var wager = call.receive<Wager>()
+            if (betUUID != wager.betId) {
+                call.respond(HttpStatusCode.BadRequest)
+                return@post
+            }
+            val user = call.authentication.principal<UserPrincipal>()?.user!!
+            wager = wagerService.addWagerForUser(wager, user)
+            call.respond(HttpStatusCode.Created, wager)
+        }
+    }
 }
+
 
 fun Route.unauthedControllers(userService: UserService) {
     route("/") {

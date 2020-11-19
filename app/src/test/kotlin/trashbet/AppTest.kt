@@ -11,9 +11,13 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.*
 import kotlin.test.*
 
 class AppTest {
+
+    var bet1Id: UUID = UUID.randomUUID()
+
     @Test
     fun testHealthCheck() = withTestApplication(Application::main) {
         with(handleRequest(HttpMethod.Get, "/health")) {
@@ -38,7 +42,7 @@ class AppTest {
     fun testRegistration() = withTestApplication(Application::main) {
         // make a user
         with(handleRequest(HttpMethod.Post, "/register", setup = {
-            setBody("{\"username\":\"joel\", \"password\":\"joel\"}")
+            setBody("{\"username\":\"test\", \"password\":\"test\"}")
             addHeader("Content-Type", "application/json")
         })) {
             assertNotNull(response.content)
@@ -63,24 +67,46 @@ class AppTest {
         }
     }
 
+    @Test
+    fun testWagers() = withTestApplication(Application::main) {
+        with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
+            setBody(Json.encodeToString(Wager(amount = 15, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
+            addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic am9lbDow")
+        })) {
+            assertEquals(HttpStatusCode.Created, response.status())
+        }
+        with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
+            setBody(Json.encodeToString(Wager(amount = 15, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
+            addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic am9lbDow")
+        })) {
+            assertEquals(HttpStatusCode.BadRequest, response.status())
+        }
+    }
+
     @BeforeTest
     fun before() {
         Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;", "org.h2.Driver")
         transaction {
             SchemaUtils.create(Users)
             SchemaUtils.create(Bets)
+            SchemaUtils.create(Wagers)
             Users.deleteAll()
+            Bets.deleteAll()
+            Wagers.deleteAll()
 
             Users.insert {
-                it[name] = "Jack"
+                it[name] = "joel"
                 it[amount] = 20
-                it[passwordHash] = UserService().hashPassword("Jack")
+                it[passwordHash] = UserService().hashPassword("joel")
             }
 
-            Bets.insert {
+            val bet1 = Bets.insert {
                 it[description] = "test bet"
                 it[complete] = false
-            }
+            } get Bets.id
+            bet1Id = bet1.value
         }
     }
 }
