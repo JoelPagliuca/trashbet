@@ -29,7 +29,9 @@ fun Application.main() {
         "production" -> {}
     }
 
-    installAuth()
+    install(Authentication) {
+        installAuth()
+    }
 
     install(ContentNegotiation) { 
         register(ContentType.Application.Json, SerializationConverter(Json { prettyPrint = true }))
@@ -37,12 +39,13 @@ fun Application.main() {
 
     val userService = UserService()
     val betService = BetService()
+    val wagerService = WagerService()
 
     install(Routing) {
         unauthedControllers(userService)
         authenticate(authenticationScheme) {
             userController(userService)
-            betController(betService)
+            betController(betService, wagerService)
         }
     }
 }
