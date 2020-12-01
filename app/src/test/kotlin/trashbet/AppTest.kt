@@ -61,6 +61,7 @@ class AppTest {
             addHeader("Authorization", "Basic am9lbDow")
         })) {
             assertNotNull(response.content)
+            assertEquals(HttpStatusCode.Created, response.status())
             val bet = Json.decodeFromString<Bet>(response.content ?: "")
             assertNotNull(bet.id)
             assertFalse(bet.complete)

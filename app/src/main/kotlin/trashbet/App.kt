@@ -33,6 +33,8 @@ fun Application.main() {
         registerAuth()
     }
 
+    install(AuthN)
+
     install(StatusPages) {
         registerExceptionHandling()
     }

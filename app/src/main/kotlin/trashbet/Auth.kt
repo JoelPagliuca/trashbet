@@ -1,8 +1,13 @@
+@file:Suppress("EXPERIMENTAL_API_USAGE")
 package trashbet
 
+import io.ktor.application.*
 import io.ktor.auth.*
+import io.ktor.routing.*
+import io.ktor.util.*
+import io.ktor.util.pipeline.*
 
-data class UserPrincipal(val user: User) : Principal
+data class UserPrincipal(val user: User, val isAdmin: Boolean = true) : Principal
 
 fun Authentication.Configuration.registerAuth() {
     basic("mock") {
@@ -25,4 +30,47 @@ fun Authentication.Configuration.registerAuth() {
             }
         }
     }
+}
+
+@Suppress("UNUSED_PARAMETER")
+class AuthN(config: Configuration) {
+
+    fun interceptPipeline(pipeline: ApplicationCallPipeline) {
+        pipeline.insertPhaseAfter(ApplicationCallPipeline.Features, Authentication.ChallengePhase)
+        pipeline.insertPhaseAfter(Authentication.ChallengePhase, AuthorizationPhase)
+
+        pipeline.intercept(AuthorizationPhase) {
+            val principal =
+                    call.authentication.principal<UserPrincipal>() ?: throw AuthorizationException("Missing principal")
+            // Apply auth
+            if (!principal.isAdmin) throw AuthorizationException("")
+        }
+    }
+
+    class Configuration
+
+    companion object Feature : ApplicationFeature<ApplicationCallPipeline, Configuration, AuthN> {
+        override val key = AttributeKey<AuthN>("AuthN")
+
+        val AuthorizationPhase = PipelinePhase("Authorization")
+
+        override fun install(pipeline: ApplicationCallPipeline, configure: Configuration.() -> Unit): AuthN {
+            val configuration = Configuration().apply(configure)
+            return AuthN(configuration)
+        }
+    }
+}
+
+class AuthorizedRouteSelector(private val description: String) :
+        RouteSelector(RouteSelectorEvaluation.qualityConstant) {
+    override fun evaluate(context: RoutingResolveContext, segmentIndex: Int) = RouteSelectorEvaluation.Constant
+
+    override fun toString(): String = "(authorize ${description})"
+}
+
+fun Route.adminRequired(build: Route.() -> Unit): Route {
+    val authorizedRoute = createChild(AuthorizedRouteSelector("admin"))
+    application.feature(AuthN).interceptPipeline(authorizedRoute)
+    authorizedRoute.build()
+    return authorizedRoute
 }
