@@ -9,6 +9,8 @@ open class AppException(message: String): Exception(message)
 
 class InputException(message: String): AppException(message)
 
+class AuthorizationException(message: String): AppException(message)
+
 fun StatusPages.Configuration.registerExceptionHandling() {
     exception<Exception> {
         call.respond(HttpStatusCode.InternalServerError)
@@ -20,5 +22,9 @@ fun StatusPages.Configuration.registerExceptionHandling() {
 
     exception<InputException> { cause ->
         call.respond(HttpStatusCode.BadRequest, cause.toString())
+    }
+
+    exception<AuthorizationException> { cause ->
+        call.respond(HttpStatusCode.Unauthorized, cause.toString())
     }
 }
