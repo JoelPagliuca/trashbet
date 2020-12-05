@@ -3,6 +3,7 @@ package trashbet
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.http.*
+import io.ktor.http.content.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -86,6 +87,14 @@ fun Route.unauthedControllers(userService: UserService) {
             }
             call.sessions.set(UserPrincipal(user.id!!, user.name, isAdmin = false))
             call.respond(HttpStatusCode.Accepted)
+        }
+    }
+}
+
+fun Route.webController() {
+    route("web") {
+        static {
+            default("web/public/index.html")
         }
     }
 }

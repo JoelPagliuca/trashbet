@@ -54,6 +54,7 @@ fun Application.main() {
 
     install(Routing) {
         unauthedControllers(userService)
+        webController()
         authenticate(authenticationScheme) {
             userController(userService)
             betController(betService, wagerService)
