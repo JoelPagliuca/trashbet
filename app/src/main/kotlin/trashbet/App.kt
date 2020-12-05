@@ -9,6 +9,7 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.Netty
+import io.ktor.sessions.*
 import kotlinx.serialization.json.Json
 
 
@@ -17,11 +18,11 @@ fun Application.main() {
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     val deploymentEnvironment = environment.config.property("ktor.deployment.environment").getString()
-    var authenticationScheme = "real"
+    var authenticationScheme = "basic"
 
     when (deploymentEnvironment) {
         "test" -> {
-            authenticationScheme = "mock"
+            authenticationScheme = "basic"
         }
         "development" -> {
             seedData()
@@ -34,6 +35,10 @@ fun Application.main() {
     }
 
     install(AuthN)
+
+    install(Sessions) {
+        cookie<UserPrincipal>(AUTH_COOKIE, storage = SessionStorageMemory()) {}
+    }
 
     install(StatusPages) {
         registerExceptionHandling()

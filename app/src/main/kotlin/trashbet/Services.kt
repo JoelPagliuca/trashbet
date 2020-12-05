@@ -1,5 +1,6 @@
 package trashbet
 
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
@@ -108,14 +109,14 @@ class WagerService {
         }.singleOrNull()
     }
 
-    fun addWagerForUser(wager: Wager, user_: User): Wager {
-        if (wager.amount > user_.amount) {
-            throw InputException("User didn't have enough to place that bet")
-        }
-        val userId = transaction {
+    fun addWagerForUser(wager: Wager, userId: UUID): Wager {
+        val amount = transaction {
             Users.select {
-                (Users.id eq user_.id!!)
-            }.single()[Users.id]
+                (Users.id eq userId)
+            }.single()[Users.amount]
+        }
+        if (wager.amount > amount) {
+            throw InputException("User didn't have enough to place that bet")
         }
         val betId = transaction {
             Bets.select {
@@ -125,12 +126,12 @@ class WagerService {
         }
         val wagerId = transaction {
             Users.update({Users.id eq userId}) {
-                it[Users.amount] = user_.amount - wager.amount
+                it[Users.amount] = amount - wager.amount
             }
             Wagers.insert {
-                it[amount] = wager.amount
+                it[Wagers.amount] = wager.amount
                 it[outcome] = wager.outcome
-                it[user] = userId
+                it[user] = EntityID<UUID>(userId, Users)
                 it[bet] = betId
             } get Wagers.id
         }

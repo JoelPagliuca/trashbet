@@ -4,27 +4,27 @@ package trashbet
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.routing.*
+import io.ktor.sessions.*
 import io.ktor.util.*
 import io.ktor.util.pipeline.*
+import kotlinx.serialization.Serializable
+import java.util.*
 
-data class UserPrincipal(val user: User, val isAdmin: Boolean = true) : Principal
+data class UserPrincipal(
+        @Serializable(with = UUIDSerializer::class) val id: UUID,
+        val name: String,
+        val isAdmin: Boolean = true
+) : Principal
+
+const val AUTH_COOKIE = "trashbet_session"
 
 fun Authentication.Configuration.registerAuth() {
-    basic("mock") {
-        realm = "ktor"
-        validate { credentials ->
-            val user = UserService().getUserByName(credentials.name)
-            if (user == null) user
-            else UserPrincipal(user)
-        }
-    }
-
-    basic("real") {
-        realm = "ktor"
+    basic("basic") {
+        skipWhen { call -> call.sessions.get<UserPrincipal>() != null }
         validate { credentials ->
             val user = UserService().loginUser(credentials.name, credentials.password)
             if (user != null) {
-                UserPrincipal(user)
+                UserPrincipal(user.id!!, user.name)
             } else {
                 null
             }
@@ -73,4 +73,8 @@ fun Route.adminRequired(build: Route.() -> Unit): Route {
     application.feature(AuthN).interceptPipeline(authorizedRoute)
     authorizedRoute.build()
     return authorizedRoute
+}
+
+fun ApplicationCall.getUserPrincipal(): UserPrincipal? {
+    return this.sessions.get<UserPrincipal>() ?: this.authentication.principal()
 }

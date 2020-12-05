@@ -17,6 +17,7 @@ import kotlin.test.*
 class AppTest {
 
     var bet1Id: UUID = UUID.randomUUID()
+    val basicAuth = "am9lbDpqb2Vs"
 
     @Test
     fun testHealthCheck() = withTestApplication(Application::main) {
@@ -27,12 +28,12 @@ class AppTest {
 
     @Test
     fun testUsers() = withTestApplication(Application::main) {
-        with(handleRequest(HttpMethod.Get, "/user", setup={addHeader("Authorization", "Basic am9lbDozMA==")})) {
+        with(handleRequest(HttpMethod.Get, "/user", setup={addHeader("Authorization", "Basic $basicAuth")})) {
             assertNotNull(response.content)
             val users = Json.decodeFromString<List<User>>(response.content ?: "")
             assertEquals(1, users.size)
         }
-        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic am9lbDozMA==")})) {
+        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth")})) {
             val user = Json.decodeFromString<User>(response.content ?: "")
             assertEquals(user.name, "joel")
         }
@@ -58,7 +59,7 @@ class AppTest {
         with(handleRequest(HttpMethod.Post, "/bet", setup = {
             setBody(Json.encodeToString(Bet(description = "test bet", complete = false)))
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic am9lbDow")
+            addHeader("Authorization", "Basic $basicAuth")
         })) {
             assertNotNull(response.content)
             assertEquals(HttpStatusCode.Created, response.status())
@@ -73,16 +74,33 @@ class AppTest {
         with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
             setBody(Json.encodeToString(Wager(amount = 15, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic am9lbDow")
+            addHeader("Authorization", "Basic $basicAuth")
         })) {
             assertEquals(HttpStatusCode.Created, response.status())
         }
         with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
             setBody(Json.encodeToString(Wager(amount = 15, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic am9lbDow")
+            addHeader("Authorization", "Basic $basicAuth")
         })) {
             assertEquals(HttpStatusCode.BadRequest, response.status())
+        }
+    }
+
+    @Test
+    fun testSessions() = withTestApplication(Application::main) {
+        var authCookie : String
+        with(handleRequest(HttpMethod.Post, "/login", setup = {
+            setBody("{\"username\":\"joel\", \"password\":\"joel\"}")
+            addHeader("Content-Type", "application/json")
+        })) {
+            assertNotNull(response.cookies[AUTH_COOKIE])
+            authCookie = response.cookies[AUTH_COOKIE]!!.value
+        }
+        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Cookie", "$AUTH_COOKIE=$authCookie")})) {
+            assertEquals(HttpStatusCode.OK, response.status())
+            val user = Json.decodeFromString<User>(response.content ?: "")
+            assertEquals(user.name, "joel")
         }
     }
 
@@ -93,9 +111,9 @@ class AppTest {
             SchemaUtils.create(Users)
             SchemaUtils.create(Bets)
             SchemaUtils.create(Wagers)
+            Wagers.deleteAll()
             Users.deleteAll()
             Bets.deleteAll()
-            Wagers.deleteAll()
 
             Users.insert {
                 it[name] = "joel"

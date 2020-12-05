@@ -6,6 +6,7 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import io.ktor.sessions.*
 import java.util.*
 
 fun Route.userController(userService: UserService) {
@@ -16,8 +17,9 @@ fun Route.userController(userService: UserService) {
         }
 
         get("/me") {
-            val principal = call.authentication.principal<UserPrincipal>()
-            principal?.user?.let { u -> call.respond(u) }
+            val principal = call.getUserPrincipal()!!
+            val user = userService.getUserByName(principal.name)
+            user?.let { call.respond(HttpStatusCode.OK, user) }
         }
     }
 }
@@ -54,8 +56,8 @@ fun Route.betController(betService: BetService, wagerService: WagerService) {
                 call.respond(HttpStatusCode.BadRequest)
                 return@post
             }
-            val user = call.authentication.principal<UserPrincipal>()?.user!!
-            wager = wagerService.addWagerForUser(wager, user)
+            val userId = call.getUserPrincipal()?.id!!
+            wager = wagerService.addWagerForUser(wager, userId)
             call.respond(HttpStatusCode.Created, wager)
         }
     }
@@ -73,6 +75,17 @@ fun Route.unauthedControllers(userService: UserService) {
             var user = User(name=registration.username, amount=0)
             user = userService.addUser(user, registration.password)
             call.respond(user)
+        }
+
+        post("/login") {
+            val creds = call.receive<UserRegistration>()
+            val user = userService.loginUser(creds.username, creds.password)
+            if (user == null) {
+                call.respond(HttpStatusCode.Unauthorized)
+                return@post
+            }
+            call.sessions.set(UserPrincipal(user.id!!, user.name, isAdmin = false))
+            call.respond(HttpStatusCode.Accepted)
         }
     }
 }
