@@ -8,6 +8,7 @@ import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
 import io.ktor.sessions.*
+import java.io.File
 import java.util.*
 
 fun Route.userController(userService: UserService) {
@@ -92,9 +93,14 @@ fun Route.unauthedControllers(userService: UserService) {
 }
 
 fun Route.webController() {
-    route("web") {
-        static {
-            default("web/public/index.html")
-        }
+    static("/") {
+        staticRootFolder = File("web/public")
+        file("build/bundle.js")
+        file("build/bundle.css")
+        file("build/bundle.js.map")
+        file("global.css")
+        file("index.html")
+        file("favicon.png")
+        default("index.html")
     }
 }
