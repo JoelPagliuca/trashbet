@@ -4,7 +4,7 @@ import org.jetbrains.exposed.sql.*
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
-import io.ktor.http.ContentType
+import io.ktor.http.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.engine.*
@@ -46,6 +46,20 @@ fun Application.main() {
 
     install(ContentNegotiation) { 
         register(ContentType.Application.Json, SerializationConverter(Json { prettyPrint = true }))
+    }
+
+    install(CORS) {
+        method(HttpMethod.Options)
+        method(HttpMethod.Get)
+        method(HttpMethod.Post)
+        method(HttpMethod.Put)
+        method(HttpMethod.Delete)
+        header(HttpHeaders.AccessControlAllowHeaders)
+        header(HttpHeaders.ContentType)
+        header(HttpHeaders.AccessControlAllowOrigin)
+        allowCredentials = true
+        maxAgeInSeconds = 86400
+        anyHost() // TODO: don't do this
     }
 
     val userService = UserService()
