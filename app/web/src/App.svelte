@@ -4,7 +4,6 @@
     Header,
     HeaderNav,
     HeaderNavItem,
-    HeaderNavMenu,
     HeaderUtilities,
     SkipToContent,
     Content,
@@ -13,7 +12,7 @@
     Column,
     HeaderGlobalAction,
   } from "carbon-components-svelte";
-  import UserAvatarFilledAlt from "carbon-icons-svelte/lib/UserAvatarFilledAlt20";
+  import Logout20 from "carbon-icons-svelte/lib/Logout20";
   import Login from "./components/Login.svelte";
   import Theme from "./components/Theme.svelte";
   import { store } from "./auth.js";
@@ -38,7 +37,7 @@
       </HeaderNav>
       
       <HeaderUtilities>
-        <HeaderGlobalAction aria-label="Login" icon={UserAvatarFilledAlt}/>
+        <HeaderGlobalAction aria-label="Logout" icon={Logout20} on:click={handleLogout}/>
       </HeaderUtilities>
     {/if}
   </Header>
