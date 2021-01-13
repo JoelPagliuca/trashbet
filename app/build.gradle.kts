@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    val ktor_version = "1.4.1"
+    val ktor_version = "1.5.0"
     val exposed_version = "0.24.1"
 
     // kotlin
