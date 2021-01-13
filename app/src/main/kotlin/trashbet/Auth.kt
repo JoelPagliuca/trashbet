@@ -41,9 +41,9 @@ class AuthN(config: Configuration) {
 
         pipeline.intercept(AuthorizationPhase) {
             val principal =
-                    call.authentication.principal<UserPrincipal>() ?: throw AuthorizationException("Missing principal")
+                    call.getUserPrincipal() ?: throw AuthorizationException("Missing principal")
             // Apply auth
-            if (!principal.isAdmin) throw AuthorizationException("")
+            if (!principal.isAdmin) throw AuthorizationException("Admin required")
         }
     }
 
