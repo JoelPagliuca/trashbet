@@ -28,8 +28,13 @@ fun seedData() {
         }
 
         Bets.insert {
-            it[description] = "Seeded bet"
+            it[description] = "Seeded incomplete bet"
             it[complete] = false
+        }
+        Bets.insert {
+            it[description] = "Seeded complete bet"
+            it[complete] = true
+            it[outcome] = true
         }
     }
 }

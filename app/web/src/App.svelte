@@ -1,6 +1,5 @@
 <script>
   import {
-    Button,
     Header,
     HeaderNav,
     HeaderNavItem,
@@ -49,7 +48,7 @@
       <Row>
         <Column>
           {#if $store != null}
-            <h1>Bets</h1>
+            <h2>Bets</h2>
             <BetList/>
           {:else}
             <Login/>
