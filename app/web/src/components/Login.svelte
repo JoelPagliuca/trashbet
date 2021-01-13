@@ -13,7 +13,6 @@
         username: username,
         password: password,
       }),
-      credentials: "omit",
     })
     if (res.ok) {
       $store = { "username": username }

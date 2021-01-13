@@ -13,6 +13,7 @@
     HeaderGlobalAction,
   } from "carbon-components-svelte";
   import Logout20 from "carbon-icons-svelte/lib/Logout20";
+  import BetList from "./components/BetList.svelte";
   import Login from "./components/Login.svelte";
   import Theme from "./components/Theme.svelte";
   import { store } from "./auth.js";
@@ -48,9 +49,8 @@
       <Row>
         <Column>
           {#if $store != null}
-            <div>
-              <Button Button on:click={handleLogout}>Logout</Button>
-            </div>
+            <h1>Bets</h1>
+            <BetList/>
           {:else}
             <Login/>
           {/if}
