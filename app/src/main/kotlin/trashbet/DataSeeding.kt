@@ -26,5 +26,10 @@ fun seedData() {
             it[amount] = 20
             it[passwordHash] = userService.hashPassword("Jill")
         }
+
+        Bets.insert {
+            it[description] = "Seeded bet"
+            it[complete] = false
+        }
     }
 }
