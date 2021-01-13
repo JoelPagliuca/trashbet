@@ -54,11 +54,12 @@ fun Application.main() {
         method(HttpMethod.Post)
         method(HttpMethod.Put)
         method(HttpMethod.Delete)
-        header(HttpHeaders.AccessControlAllowHeaders)
         header(HttpHeaders.ContentType)
-        header(HttpHeaders.AccessControlAllowOrigin)
+        header(HttpHeaders.Cookie)
+        exposeHeader(HttpHeaders.SetCookie)
+        exposeHeader(HttpHeaders.ContentLength)
         allowCredentials = true
-        maxAgeInSeconds = 86400
+        maxAgeInSeconds = 360
         anyHost() // TODO: don't do this
     }
 

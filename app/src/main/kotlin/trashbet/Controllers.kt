@@ -86,7 +86,7 @@ fun Route.unauthedControllers(userService: UserService) {
                 call.respond(HttpStatusCode.Unauthorized)
                 return@post
             }
-            call.sessions.set(UserPrincipal(user.id!!, user.name, isAdmin = false))
+            call.sessions.set(UserPrincipal(user.id!!, user.name, isAdmin = true))
             call.respond(HttpStatusCode.Accepted)
         }
     }
