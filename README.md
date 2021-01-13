@@ -28,6 +28,11 @@ health [endpoint](http://localhost:8080/health)
 Web bundle is also being served on this port at the webroot
 
 ### Web
+create `./app/web/.env`
+```sh
+API_ENDPOINT=http://localhost:8080
+```
+then run
 ```sh
 # from ./app/web
 npm install
