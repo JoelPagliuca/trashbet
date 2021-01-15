@@ -73,6 +73,7 @@ fun Application.main() {
         authenticate(authenticationScheme) {
             userController(userService)
             betController(betService, wagerService)
+            wagerController(wagerService)
         }
     }
 }

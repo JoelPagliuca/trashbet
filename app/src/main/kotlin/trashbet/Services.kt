@@ -101,6 +101,14 @@ class WagerService {
         }
     }
 
+    fun getWagersByUserId(userId: UUID): List<Wager> = transaction {
+        Wagers.select {
+            (Wagers.user eq userId)
+        }.mapNotNull {
+            toWager(it)
+        }
+    }
+
     private fun getWagerById(id: UUID): Wager? = transaction {
         Wagers.select {
             (Wagers.id eq id)

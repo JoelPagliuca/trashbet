@@ -17,7 +17,8 @@ import kotlin.test.*
 class AppTest {
 
     var bet1Id: UUID = UUID.randomUUID()
-    val basicAuth = "am9lbDpqb2Vs"
+    var user1Id: UUID = UUID.randomUUID()
+    private val basicAuth = "am9lbDpqb2Vs"
 
     @Test
     fun testHealthCheck() = withTestApplication(Application::main) {
@@ -70,7 +71,7 @@ class AppTest {
     }
 
     @Test
-    fun testWagers() = withTestApplication(Application::main) {
+    fun testCreateWagers() = withTestApplication(Application::main) {
         with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
             setBody(Json.encodeToString(Wager(amount = 15, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
             addHeader("Content-Type", "application/json")
@@ -84,6 +85,17 @@ class AppTest {
             addHeader("Authorization", "Basic $basicAuth")
         })) {
             assertEquals(HttpStatusCode.BadRequest, response.status())
+        }
+    }
+
+    @Test
+    fun testReadWagers() = withTestApplication(Application::main) {
+        with(handleRequest(HttpMethod.Get, "/wager/user", setup = {
+            addHeader("Authorization", "Basic $basicAuth")
+        })) {
+            assertNotNull(response.content)
+            val wagers = Json.decodeFromString<List<Wager>>(response.content ?: "")
+            assertEquals(1, wagers.size)
         }
     }
 
@@ -115,17 +127,25 @@ class AppTest {
             Users.deleteAll()
             Bets.deleteAll()
 
-            Users.insert {
+            val user1 = Users.insert {
                 it[name] = "joel"
                 it[amount] = 20
                 it[passwordHash] = UserService().hashPassword("joel")
-            }
+            } get Users.id
+            user1Id = user1.value
 
             val bet1 = Bets.insert {
                 it[description] = "test bet"
                 it[complete] = false
             } get Bets.id
             bet1Id = bet1.value
+
+            Wagers.insert {
+                it[amount] = 10
+                it[outcome] = true
+                it[user] = user1
+                it[bet] = bet1
+            }
         }
     }
 }

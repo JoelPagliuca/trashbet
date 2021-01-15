@@ -1,7 +1,6 @@
 package trashbet
 
 import io.ktor.application.*
-import io.ktor.auth.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.request.*
@@ -65,6 +64,15 @@ fun Route.betController(betService: BetService, wagerService: WagerService) {
     }
 }
 
+fun Route.wagerController(wagerService: WagerService) {
+    route("/wager/user") {
+        get("/") {
+            val principal = call.getUserPrincipal()!!
+            val wagers = wagerService.getWagersByUserId(principal.id)
+            call.respond(wagers)
+        }
+    }
+}
 
 fun Route.unauthedControllers(userService: UserService) {
     route("/") {
