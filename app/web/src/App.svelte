@@ -40,10 +40,10 @@
   </Header>
     
   <Content>
-          {#if $store != null}
+    {#if $store != null}
       <Main/>
-          {:else}
-            <Login/>
-          {/if}
+    {:else}
+      <Login/>
+    {/if}
   </Content>
 </Theme>
