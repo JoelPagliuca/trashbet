@@ -6,16 +6,13 @@
     HeaderUtilities,
     SkipToContent,
     Content,
-    Grid,
-    Row,
-    Column,
     HeaderGlobalAction,
   } from "carbon-components-svelte";
   import Logout20 from "carbon-icons-svelte/lib/Logout20";
-  import BetList from "./components/BetList.svelte";
   import Login from "./components/Login.svelte";
   import Theme from "./components/Theme.svelte";
   import { store } from "./auth.js";
+  import Main from "./components/Main.svelte";
 
   let isSideNavOpen = false;
 
@@ -42,19 +39,11 @@
     {/if}
   </Header>
     
-
   <Content>
-    <Grid>
-      <Row>
-        <Column>
           {#if $store != null}
-            <h2>Bets</h2>
-            <BetList/>
+      <Main/>
           {:else}
             <Login/>
           {/if}
-        </Column>
-      </Row>
-    </Grid>
   </Content>
 </Theme>

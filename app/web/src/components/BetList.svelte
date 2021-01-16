@@ -1,7 +1,10 @@
 <script>
-import { Form, FormGroup, InlineLoading, Modal, NumberInput, StructuredList, StructuredListBody, StructuredListCell, StructuredListHead, StructuredListRow, StructuredListSkeleton, Toggle } from "carbon-components-svelte";
-import { onMount } from "svelte";
-import { apiFetch } from "../api";
+  import { Form, FormGroup, InlineLoading, Modal, NumberInput, StructuredList, StructuredListBody, StructuredListCell, StructuredListHead, StructuredListRow, StructuredListSkeleton, Toggle } from "carbon-components-svelte";
+  import { createEventDispatcher, onMount } from "svelte";
+  import { apiFetch } from "../api";
+
+  const dispatch = createEventDispatcher()
+  const eventWagerPlaced = "wagerPlaced"
 
   let bets = []
   onMount(async () => {
@@ -19,20 +22,22 @@ import { apiFetch } from "../api";
   let amount = 1
   let outcome = true
   async function postWager(betId, wagerAmount, wagerOutcome) {
+    let newWager = {
+      amount: wagerAmount,
+      outcome: wagerOutcome,
+      betId: betId,
+      userId: betId, // api needs any uuid here
+    }
     const res = await apiFetch(
       `/bet/${betId}/wager`,
       {
         method: "POST",
-        body: JSON.stringify({
-          amount: wagerAmount,
-          outcome: wagerOutcome,
-          betId: betId,
-          userId: betId, // api needs any uuid here
-        })
+        body: JSON.stringify(newWager)
       }
     )
     if (res.ok) {
       alert("Successful wager")
+      dispatch(eventWagerPlaced, newWager)
     } else {
       alert("Wager error")
     }
