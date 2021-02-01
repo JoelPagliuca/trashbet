@@ -15,7 +15,11 @@
       }),
     })
     if (res.ok) {
-      $store = { "username": username }
+      $store = {
+        "name": username,
+        "amount": 0,
+        "id": "",
+      }
       return
     } else {
       throw new Error("bad login")

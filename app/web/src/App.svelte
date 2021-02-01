@@ -2,7 +2,6 @@
   import {
     Header,
     HeaderNav,
-    HeaderNavItem,
     HeaderUtilities,
     SkipToContent,
     Content,
@@ -13,6 +12,7 @@
   import Theme from "./components/Theme.svelte";
   import { store } from "./auth.js";
   import Main from "./components/Main.svelte";
+  import Points from "./components/Points.svelte";
 
   let isSideNavOpen = false;
 
@@ -30,7 +30,7 @@
     
     {#if $store != null}
       <HeaderNav>
-        <HeaderNavItem href="/" text="Home" />
+        <Points/>
       </HeaderNav>
       
       <HeaderUtilities>
