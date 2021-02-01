@@ -1,5 +1,6 @@
 <script>
   import { Column, Grid, Row } from "carbon-components-svelte";
+  import { store } from "../auth";
   import BetList from "./BetList.svelte";
   import WagerList from "./WagerList.svelte";
 
@@ -7,8 +8,8 @@
 
   function updateWagers(event) {
     let newWager = event.detail
-    console.log(newWager)
     wagers = [newWager, ...wagers]
+    $store.amount -= newWager.amount
   }
 
 </script>
