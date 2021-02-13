@@ -2,6 +2,7 @@
   import { Column, Grid, Row } from "carbon-components-svelte";
   import { store } from "../auth";
   import BetList from "./BetList.svelte";
+  import Notifications from "./Notifications.svelte";
   import WagerList from "./WagerList.svelte";
 
   let wagers = []
@@ -26,3 +27,4 @@
     </Column>
   </Row>
 </Grid>
+<Notifications/>

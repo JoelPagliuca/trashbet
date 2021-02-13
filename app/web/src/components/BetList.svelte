@@ -2,6 +2,7 @@
   import { Form, FormGroup, InlineLoading, Modal, NumberInput, StructuredList, StructuredListBody, StructuredListCell, StructuredListHead, StructuredListRow, StructuredListSkeleton, Toggle } from "carbon-components-svelte";
   import { createEventDispatcher, onMount } from "svelte";
   import { apiFetch } from "../api";
+  import { notify } from "../store/notification";
 
   const dispatch = createEventDispatcher()
   const eventWagerPlaced = "wagerPlaced"
@@ -36,10 +37,10 @@
       }
     )
     if (res.ok) {
-      alert("Successful wager")
+      notify("Successful wager", "success")
       dispatch(eventWagerPlaced, newWager)
     } else {
-      alert("Wager error")
+      notify("Wager error", "error")
     }
     postWagerPromise = null
   }
