@@ -16,8 +16,9 @@ import kotlin.test.*
 
 class AppTest {
 
-    var bet1Id: UUID = UUID.randomUUID()
-    var user1Id: UUID = UUID.randomUUID()
+    private var bet1Id: UUID = UUID.randomUUID()
+    private var bet2Id: UUID = UUID.randomUUID()
+    private var user1Id: UUID = UUID.randomUUID()
     private val basicAuth = "am9lbDpqb2Vs"
 
     @Test
@@ -72,6 +73,23 @@ class AppTest {
 
     @Test
     fun testCreateWagers() = withTestApplication(Application::main) {
+        // wager amount higher than user's amount
+        with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
+            setBody(Json.encodeToString(Wager(amount = 115, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
+            addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic $basicAuth")
+        })) {
+            assertEquals(HttpStatusCode.BadRequest, response.status())
+        }
+        // 0 amount wager
+        with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
+            setBody(Json.encodeToString(Wager(amount = 0, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
+            addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic $basicAuth")
+        })) {
+            assertEquals(HttpStatusCode.BadRequest, response.status())
+        }
+        // good wager
         with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
             setBody(Json.encodeToString(Wager(amount = 15, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
             addHeader("Content-Type", "application/json")
@@ -79,8 +97,9 @@ class AppTest {
         })) {
             assertEquals(HttpStatusCode.Created, response.status())
         }
+        // multiple wagers on a bet
         with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
-            setBody(Json.encodeToString(Wager(amount = 15, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
+            setBody(Json.encodeToString(Wager(amount = 1, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
             addHeader("Content-Type", "application/json")
             addHeader("Authorization", "Basic $basicAuth")
         })) {
@@ -140,11 +159,17 @@ class AppTest {
             } get Bets.id
             bet1Id = bet1.value
 
+            val bet2 = Bets.insert {
+                it[description] = "test bet again"
+                it[complete] = false
+            } get Bets.id
+            bet2Id = bet2.value
+
             Wagers.insert {
                 it[amount] = 10
                 it[outcome] = true
                 it[user] = user1
-                it[bet] = bet1
+                it[bet] = bet2
             }
         }
     }

@@ -54,10 +54,19 @@ fun Route.betController(betService: BetService, wagerService: WagerService) {
             val betUUID = UUID.fromString(betId)
             var wager = call.receive<Wager>()
             if (betUUID != wager.betId) {
-                call.respond(HttpStatusCode.BadRequest)
+                call.respond(HttpStatusCode.BadRequest, "bet ids don't match")
+                return@post
+            }
+            if (wager.amount <= 0) {
+                call.respond(HttpStatusCode.BadRequest, "bad wager amount")
                 return@post
             }
             val userId = call.getUserPrincipal()?.id!!
+            val currentWagers = wagerService.getWagersByUserId(userId)
+            if (currentWagers.any { it.betId == wager.betId }) {
+                call.respond(HttpStatusCode.BadRequest, "user already has wager for bet")
+                return@post
+            }
             wager = wagerService.addWagerForUser(wager, userId)
             call.respond(HttpStatusCode.Created, wager)
         }
