@@ -128,7 +128,7 @@ class WagerService {
         }
         val betId = transaction {
             Bets.select {
-                (Bets.id eq wager.betId)
+                (Bets.id eq wager.betId) and
                 (Bets.complete eq false)
             }.single()[Bets.id]
         }
