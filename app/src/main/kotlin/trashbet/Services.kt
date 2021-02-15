@@ -96,7 +96,7 @@ class BetService {
         var oddsfor: Float? = null
         var oddsagainst: Float? = null
         if (amountfor != 0 && amountagainst != 0) {
-            oddsfor = if (amountfor > amountagainst) round(amountfor.toFloat() / amountagainst.toFloat()) else 1f
+            oddsfor = if (amountfor > amountagainst) (amountfor.toFloat() / amountagainst.toFloat()) else 1f
             oddsagainst = if (amountagainst > amountfor) (amountagainst.toFloat() / amountfor.toFloat()) else 1f
         }
         return Bet(
