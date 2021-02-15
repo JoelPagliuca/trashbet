@@ -84,12 +84,23 @@ class BetService {
         getBetById(id.value)!!
     }
 
-    private fun toBet(row: ResultRow): Bet = Bet(
-            id = row[Bets.id].value,
-            description = row[Bets.description],
-            complete = row[Bets.complete],
-            outcome = row[Bets.outcome],
-    )
+    private fun toBet(row: ResultRow): Bet {
+        val wagers = transaction {
+            Wagers.select {
+                (Wagers.bet eq row[Bets.id])
+            }
+        }
+        val afor = wagers.filter { it[Wagers.outcome] }.fold(0){sum, it -> sum + it[Wagers.amount]}
+        val against = wagers.filterNot { it[Wagers.outcome] }.fold(0){sum, it -> sum + it[Wagers.amount]}
+        return Bet(
+                id = row[Bets.id].value,
+                description = row[Bets.description],
+                complete = row[Bets.complete],
+                outcome = row[Bets.outcome],
+                amount_for = afor,
+                amount_against = against,
+        )
+    }
 }
 
 class WagerService {

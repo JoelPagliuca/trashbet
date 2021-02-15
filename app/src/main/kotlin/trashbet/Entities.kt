@@ -36,6 +36,8 @@ data class Bet(
         val description: String,
         val complete: Boolean,
         val outcome: Boolean? = null,
+        val amount_for: Int? = null,
+        val amount_against: Int? = null,
 )
 
 object Bets: UUIDTable() {
