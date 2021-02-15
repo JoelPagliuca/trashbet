@@ -19,7 +19,9 @@ class AppTest {
     private var bet1Id: UUID = UUID.randomUUID()
     private var bet2Id: UUID = UUID.randomUUID()
     private var user1Id: UUID = UUID.randomUUID()
+    private var user2Id: UUID = UUID.randomUUID()
     private val basicAuth = "am9lbDpqb2Vs"
+    private val basicAuth2 = "amFjazpqYWNr"
 
     @Test
     fun testHealthCheck() = withTestApplication(Application::main) {
@@ -33,7 +35,7 @@ class AppTest {
         with(handleRequest(HttpMethod.Get, "/user", setup={addHeader("Authorization", "Basic $basicAuth")})) {
             assertNotNull(response.content)
             val users = Json.decodeFromString<List<User>>(response.content ?: "")
-            assertEquals(1, users.size)
+            assertEquals(2, users.size)
         }
         with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth")})) {
             val user = Json.decodeFromString<User>(response.content ?: "")
@@ -119,6 +121,35 @@ class AppTest {
     }
 
     @Test
+    fun testOddsCalculation() =withTestApplication(Application::main) {
+        with(handleRequest(HttpMethod.Get, "/bet", setup = {
+            addHeader("Authorization", "Basic $basicAuth2")
+        })) {
+            assertNotNull(response.content)
+            val bets = Json.decodeFromString<List<Bet>>(response.content ?: "")
+            val bet2 = bets.filter { it.id!! == bet2Id }[0]
+            assertEquals(0, bet2.amount_against)
+            assertNull(bet2.odds_against)
+            assertNull(bet2.odds_for)
+        }
+        handleRequest(HttpMethod.Post, "/bet/$bet2Id/wager", setup = {
+            setBody(Json.encodeToString(Wager(amount = 5, outcome = false, userId = UUID.randomUUID(), betId = bet2Id)))
+            addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic $basicAuth2")
+        })
+        with(handleRequest(HttpMethod.Get, "/bet", setup = {
+            addHeader("Authorization", "Basic $basicAuth2")
+        })) {
+            assertNotNull(response.content)
+            val bets = Json.decodeFromString<List<Bet>>(response.content ?: "")
+            val bet2 = bets.filter { it.id!! == bet2Id }[0]
+            assertEquals(5, bet2.amount_against)
+            assertEquals(1f, bet2.odds_against)
+            assertEquals(2f, bet2.odds_for)
+        }
+    }
+
+    @Test
     fun testSessions() = withTestApplication(Application::main) {
         var authCookie : String
         with(handleRequest(HttpMethod.Post, "/login", setup = {
@@ -152,6 +183,13 @@ class AppTest {
                 it[passwordHash] = UserService().hashPassword("joel")
             } get Users.id
             user1Id = user1.value
+
+            val user2 = Users.insert {
+                it[name] = "jack"
+                it[amount] = 20
+                it[passwordHash] = UserService().hashPassword("jack")
+            } get Users.id
+            user2Id = user2.value
 
             val bet1 = Bets.insert {
                 it[description] = "test bet"

@@ -36,8 +36,8 @@ data class Bet(
         val description: String,
         val complete: Boolean,
         val outcome: Boolean? = null,
-        val amount_for: Int? = null,
-        val amount_against: Int? = null,
+        val amount_for: Int = 0,
+        val amount_against: Int = 0,
         val odds_for: Float? = null,
         val odds_against: Float? = null,
 )
