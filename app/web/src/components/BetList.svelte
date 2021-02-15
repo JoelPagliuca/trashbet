@@ -58,7 +58,7 @@
     <StructuredListHead>
       <StructuredListRow head>
         <StructuredListCell head>Description</StructuredListCell>
-        <StructuredListCell head>Complete</StructuredListCell>
+        <StructuredListCell head>For : Against</StructuredListCell>
         <StructuredListCell head>{""}</StructuredListCell>
       </StructuredListRow>
     </StructuredListHead>
@@ -66,7 +66,7 @@
       {#each bets as bet}
       <StructuredListRow label for="row-{bet.id}" on:click={() => openWagerModal(bet)}>
         <StructuredListCell>{bet.description}</StructuredListCell>
-        <StructuredListCell>{bet.complete}</StructuredListCell>
+        <StructuredListCell>{bet.odds_for?.toFixed(2) || "-"}:{bet.odds_against?.toFixed(2) || "-"}</StructuredListCell>
         <StructuredListCell>
           {#if currentBet == bet && postWagerPromise != null}
             {#await postWagerPromise}

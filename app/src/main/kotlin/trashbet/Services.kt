@@ -90,15 +90,24 @@ class BetService {
                 (Wagers.bet eq row[Bets.id])
             }
         }
-        val afor = wagers.filter { it[Wagers.outcome] }.fold(0){sum, it -> sum + it[Wagers.amount]}
-        val against = wagers.filterNot { it[Wagers.outcome] }.fold(0){sum, it -> sum + it[Wagers.amount]}
+        val amountfor = wagers.filter { it[Wagers.outcome] }.fold(0){sum, it -> sum + it[Wagers.amount]}
+        val amountagainst = wagers.filterNot { it[Wagers.outcome] }.fold(0){sum, it -> sum + it[Wagers.amount]}
+        // odds calculation
+        var oddsfor: Float? = null
+        var oddsagainst: Float? = null
+        if (amountfor != 0 && amountagainst != 0) {
+            oddsfor = if (amountfor > amountagainst) round(amountfor.toFloat() / amountagainst.toFloat()) else 1f
+            oddsagainst = if (amountagainst > amountfor) (amountagainst.toFloat() / amountfor.toFloat()) else 1f
+        }
         return Bet(
                 id = row[Bets.id].value,
                 description = row[Bets.description],
                 complete = row[Bets.complete],
                 outcome = row[Bets.outcome],
-                amount_for = afor,
-                amount_against = against,
+                amount_for = amountfor,
+                amount_against = amountagainst,
+                odds_for = oddsfor,
+                odds_against = oddsagainst,
         )
     }
 }
