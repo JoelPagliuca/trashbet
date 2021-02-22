@@ -49,6 +49,11 @@ object Bets: UUIDTable() {
 }
 
 @Serializable
+data class BetCompletion(
+        val outcome: Boolean
+)
+
+@Serializable
 data class Wager(
         @Serializable(with = UUIDSerializer::class) val id: UUID? = null,
         val amount: Int,

@@ -5,6 +5,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
 import java.util.*
+import kotlin.math.roundToInt
 
 class UserService {
     fun getAllUsers(): List<User> = transaction {
@@ -82,6 +83,17 @@ class BetService {
             it[complete] = false
         } get Bets.id
         getBetById(id.value)!!
+    }
+
+    fun completeBet(betId: UUID, new_outcome: Boolean): Bet = transaction {
+        val rows = Bets.update({Bets.id eq betId}) {
+            it[complete] = true
+            it[outcome] = new_outcome
+        }
+        if (rows != 1) {
+            throw InputException("This bet did not exist")
+        }
+        getBetById(betId)!!
     }
 
     private fun toBet(row: ResultRow): Bet {
@@ -164,6 +176,22 @@ class WagerService {
             } get Wagers.id
         }
         return getWagerById(wagerId.value)!!
+    }
+
+    fun payoutWagers(bet: Bet) = transaction {
+        val total = bet.amount_against + bet.amount_for
+        val outcome_amount = if (bet.outcome!!) bet.amount_for else bet.amount_against
+        val wagers = getWagersByBetId(bet.id!!)
+        val winners = wagers.filter { it.outcome == bet.outcome }
+        for (w in winners) {
+            val percent = w.amount.toFloat() / outcome_amount.toFloat()
+            val earnings = total * percent
+            Users.update({Users.id eq w.userId}) {
+                with(SqlExpressionBuilder) {
+                    it.update(amount, amount.plus(earnings.roundToInt()))
+                }
+            }
+        }
     }
 
     private fun toWager(row: ResultRow): Wager = Wager(

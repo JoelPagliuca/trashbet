@@ -27,16 +27,24 @@ fun Route.userController(userService: UserService) {
 
 fun Route.betController(betService: BetService, wagerService: WagerService) {
     route("/bet") {
+        get("/") {
+            val bets = betService.getAllBets()
+            call.respond(bets)
+        }
         adminRequired {
-            get("/") {
-                val bets = betService.getAllBets()
-                call.respond(bets)
-            }
-
             post("/") {
                 var bet = call.receive<Bet>()
                 bet = betService.addBet(bet)
                 call.respond(HttpStatusCode.Created, bet)
+            }
+
+            post("/{betId}/complete") {
+                val betId = call.parameters["betId"]!!
+                val betUUID = UUID.fromString(betId)
+                val betCompletion = call.receive<BetCompletion>()
+                val bet = betService.completeBet(betUUID, betCompletion.outcome)
+                wagerService.payoutWagers(bet)
+                call.respond(HttpStatusCode.Accepted)
             }
         }
     }
