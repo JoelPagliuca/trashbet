@@ -65,8 +65,15 @@ class UserService {
 }
 
 class BetService {
-    fun getAllBets(): List<Bet> = transaction {
-        Bets.selectAll().map{ toBet(it) }
+    fun getAllBets(complete: Boolean?): List<Bet> = transaction {
+        val query = complete?.let {
+            Bets.select {
+                (Bets.complete eq complete)
+            }
+        } ?: run {
+            Bets.selectAll()
+        }
+        query.map{ toBet(it) }
     }
 
     private fun getBetById(id: UUID): Bet? = transaction {

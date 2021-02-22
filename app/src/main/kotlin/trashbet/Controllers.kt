@@ -28,7 +28,8 @@ fun Route.userController(userService: UserService) {
 fun Route.betController(betService: BetService, wagerService: WagerService) {
     route("/bet") {
         get("/") {
-            val bets = betService.getAllBets()
+            var filter_complete = call.request.queryParameters["complete"]?.toBoolean()
+            val bets = betService.getAllBets(filter_complete)
             call.respond(bets)
         }
         adminRequired {

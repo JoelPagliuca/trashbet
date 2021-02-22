@@ -19,6 +19,7 @@ class AppTest {
     private var bet1Id: UUID = UUID.randomUUID()
     private var bet2Id: UUID = UUID.randomUUID()
     private var bet3Id: UUID = UUID.randomUUID()
+    private var bet4Id: UUID = UUID.randomUUID()
     private var user1Id: UUID = UUID.randomUUID()
     private var user2Id: UUID = UUID.randomUUID()
     private val basicAuth = "am9lbDpqb2Vs"
@@ -72,6 +73,22 @@ class AppTest {
             assertNotNull(bet.id)
             assertFalse(bet.complete)
         }
+        with(handleRequest(HttpMethod.Get, "/bet", setup = {
+            addHeader("Authorization", "Basic $basicAuth")
+        })) {
+            assertNotNull(response.content)
+            assertEquals(HttpStatusCode.OK, response.status())
+            val bets = Json.decodeFromString<List<Bet>>(response.content ?: "")
+            assertEquals(5, bets.size)
+        }
+        with(handleRequest(HttpMethod.Get, "/bet?complete=true", setup = {
+            addHeader("Authorization", "Basic $basicAuth")
+        })) {
+            assertNotNull(response.content)
+            assertEquals(HttpStatusCode.OK, response.status())
+            val bets = Json.decodeFromString<List<Bet>>(response.content ?: "")
+            assertEquals(1, bets.size)
+        }
     }
 
     @Test
@@ -117,7 +134,7 @@ class AppTest {
         })) {
             assertNotNull(response.content)
             val wagers = Json.decodeFromString<List<Wager>>(response.content ?: "")
-            assertEquals(1, wagers.size)
+            assertEquals(2, wagers.size)
         }
     }
 
@@ -268,6 +285,12 @@ class AppTest {
                 it[user] = user2
                 it[bet] = bet3
             }
+
+            val bet4 = Bets.insert {
+                it[description] = "complete bet"
+                it[complete] = true
+            } get Bets.id
+            bet4Id = bet3.value
         }
     }
 }
