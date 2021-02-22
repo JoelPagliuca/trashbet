@@ -18,6 +18,7 @@ class AppTest {
 
     private var bet1Id: UUID = UUID.randomUUID()
     private var bet2Id: UUID = UUID.randomUUID()
+    private var bet3Id: UUID = UUID.randomUUID()
     private var user1Id: UUID = UUID.randomUUID()
     private var user2Id: UUID = UUID.randomUUID()
     private val basicAuth = "am9lbDpqb2Vs"
@@ -150,6 +151,28 @@ class AppTest {
     }
 
     @Test
+    fun testPayout() = withTestApplication(Application::main) {
+        with(handleRequest(HttpMethod.Post, "/bet/$bet3Id/complete", setup = {
+            setBody("{\"outcome\":true}")
+            addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic $basicAuth")
+        })) {
+            assertEquals(HttpStatusCode.Accepted, response.status())
+        }
+        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth")})) {
+            val user = Json.decodeFromString<User>(response.content ?: "")
+            assertEquals("joel", user.name)
+            assertEquals(50, user.amount)
+        }
+        // make sure the other person didn't get paid out
+        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth2")})) {
+            val user = Json.decodeFromString<User>(response.content ?: "")
+            assertEquals("jack", user.name)
+            assertEquals(20, user.amount)
+        }
+    }
+
+    @Test
     fun testSessions() = withTestApplication(Application::main) {
         var authCookie : String
         with(handleRequest(HttpMethod.Post, "/login", setup = {
@@ -208,6 +231,26 @@ class AppTest {
                 it[outcome] = true
                 it[user] = user1
                 it[bet] = bet2
+            }
+
+            val bet3 = Bets.insert {
+                it[description] = "test to payout"
+                it[complete] = false
+            } get Bets.id
+            bet3Id = bet3.value
+
+            Wagers.insert {
+                it[amount] = 10
+                it[outcome] = true
+                it[user] = user1
+                it[bet] = bet3
+            }
+
+            Wagers.insert {
+                it[amount] = 20
+                it[outcome] = false
+                it[user] = user2
+                it[bet] = bet3
             }
         }
     }
