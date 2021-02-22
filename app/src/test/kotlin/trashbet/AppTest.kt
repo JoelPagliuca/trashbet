@@ -164,11 +164,27 @@ class AppTest {
             assertEquals("joel", user.name)
             assertEquals(50, user.amount)
         }
-        // make sure the other person didn't get paid out
+        // make sure the loser didn't get paid out
         with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth2")})) {
             val user = Json.decodeFromString<User>(response.content ?: "")
             assertEquals("jack", user.name)
             assertEquals(20, user.amount)
+        }
+        // should not be able to complete twice
+        with(handleRequest(HttpMethod.Post, "/bet/$bet3Id/complete", setup = {
+            setBody("{\"outcome\":false}")
+            addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic $basicAuth")
+        })) {
+            assertEquals(HttpStatusCode.BadRequest, response.status())
+        }
+        // BadRequest when betId not found
+        with(handleRequest(HttpMethod.Post, "/bet/${UUID.randomUUID()}/complete", setup = {
+            setBody("{\"outcome\":false}")
+            addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic $basicAuth")
+        })) {
+            assertEquals(HttpStatusCode.BadRequest, response.status())
         }
     }
 

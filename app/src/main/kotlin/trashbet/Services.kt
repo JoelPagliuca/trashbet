@@ -86,12 +86,12 @@ class BetService {
     }
 
     fun completeBet(betId: UUID, new_outcome: Boolean): Bet = transaction {
-        val rows = Bets.update({Bets.id eq betId}) {
+        val rows = Bets.update({(Bets.id eq betId) and (Bets.complete eq false)}) {
             it[complete] = true
             it[outcome] = new_outcome
         }
         if (rows != 1) {
-            throw InputException("This bet did not exist")
+            throw InputException("This bet did not exist or is complete")
         }
         getBetById(betId)!!
     }
