@@ -30,7 +30,7 @@ class UserService {
                 it[name] = user.name
                 it[amount] = 0
                 it[password_hash] = hashPassword(password)
-                it[is_admin] = is_first
+                it[admin] = is_first
             }
         } get Users.name
         return getUserByName(name)!!

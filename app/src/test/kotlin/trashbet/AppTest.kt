@@ -251,7 +251,7 @@ class AppTest {
                 it[name] = "joel"
                 it[amount] = 20
                 it[password_hash] = UserService().hashPassword("joel")
-                it[is_admin] = false
+                it[admin] = false
             } get Users.id
             user1Id = user1.value
 
@@ -259,7 +259,7 @@ class AppTest {
                 it[name] = "jack"
                 it[amount] = 20
                 it[password_hash] = UserService().hashPassword("jack")
-                it[is_admin] = false
+                it[admin] = false
             } get Users.id
             user2Id = user2.value
 
