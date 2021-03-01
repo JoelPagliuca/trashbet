@@ -29,7 +29,7 @@ object Users: UUIDTable() {
     val name = varchar("name", 255)
     val amount = integer("amount")
     val password_hash = varchar("password", 255)
-    val admin = bool("is_admin")
+    val admin = bool("admin")
 }
 
 @Serializable

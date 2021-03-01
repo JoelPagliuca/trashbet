@@ -59,6 +59,17 @@ class UserService {
         return BCrypt.checkpw(plaintext, passwordHash)
     }
 
+    fun promoteUser(userId: UUID) {
+        val rows = transaction {
+            Users.update({ Users.id eq userId }) {
+                it[admin] = true
+            }
+        }
+        if (rows != 1) {
+            throw InputException("This user is already admin or didn't exist")
+        }
+    }
+
     private fun toUser(row: ResultRow): User = User(
             id = row[Users.id].value,
             name = row[Users.name],

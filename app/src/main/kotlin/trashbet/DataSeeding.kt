@@ -15,16 +15,19 @@ fun seedData() {
             it[name] = "John"
             it[amount] = 20
             it[password_hash] = userService.hashPassword("John")
+            it[admin] = true
         }
         Users.insert {
             it[name] = "Jack"
             it[amount] = 20
             it[password_hash] = userService.hashPassword("Jack")
+            it[admin] = true
         }
         Users.insert {
             it[name] = "Jill"
             it[amount] = 20
             it[password_hash] = userService.hashPassword("Jill")
+            it[admin] = false
         }
 
         Bets.insert {

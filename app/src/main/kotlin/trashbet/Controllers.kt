@@ -12,15 +12,24 @@ import java.util.*
 
 fun Route.userController(userService: UserService) {
     route("/user") {
-        get("/") {
-            val users = userService.getAllUsers()
-            call.respond(users)
-        }
-
         get("/me") {
             val principal = call.getUserPrincipal()!!
             val user = userService.getUserByName(principal.name)
             user?.let { call.respond(HttpStatusCode.OK, user) }
+        }
+
+        adminRequired {
+            get("/") {
+                val users = userService.getAllUsers()
+                call.respond(users)
+            }
+
+            post("/promote") {
+                val userId = call.request.queryParameters["userId"]!!
+                val userUUID = UUID.fromString(userId)
+                userService.promoteUser(userUUID)
+                call.respond(HttpStatusCode.Accepted)
+            }
         }
     }
 }

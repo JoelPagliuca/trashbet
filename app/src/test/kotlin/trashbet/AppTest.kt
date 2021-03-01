@@ -34,14 +34,25 @@ class AppTest {
 
     @Test
     fun testUsers() = withTestApplication(Application::main) {
+        // get all users
         with(handleRequest(HttpMethod.Get, "/user", setup={addHeader("Authorization", "Basic $basicAuth1")})) {
             assertNotNull(response.content)
             val users = Json.decodeFromString<List<User>>(response.content ?: "")
             assertEquals(2, users.size)
         }
+        // get current user
         with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth1")})) {
             val user = Json.decodeFromString<User>(response.content ?: "")
             assertEquals(user.name, "joel")
+        }
+        // promote a user
+        with(handleRequest(HttpMethod.Post, "/user/promote?userId=$user2Id", setup={addHeader("Authorization", "Basic $basicAuth1")})) {
+            assertEquals(HttpStatusCode.Accepted, response.status())
+        }
+        // confirm promotion
+        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth2")})) {
+            val user = Json.decodeFromString<User>(response.content ?: "")
+            assertTrue(user.admin)
         }
     }
 
