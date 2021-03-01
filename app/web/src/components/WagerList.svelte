@@ -6,7 +6,7 @@
 
   export let wagers = []
   onMount(async () => {
-    const res = await apiFetch("/wager/user")
+    const res = await apiFetch("/wager/user?complete=false")
     wagers = await res.json()
   })
 </script>

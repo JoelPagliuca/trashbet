@@ -9,7 +9,7 @@
 
   let bets = []
   onMount(async () => {
-    const res = await apiFetch("/bet")
+    const res = await apiFetch("/bet?complete=false")
     bets = await res.json()
   })
 
