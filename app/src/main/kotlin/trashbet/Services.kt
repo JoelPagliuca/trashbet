@@ -2,7 +2,6 @@ package trashbet
 
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
 import java.util.*
@@ -25,11 +24,13 @@ class UserService {
         if (getUserByName(user.name) != null) {
             throw Exception("username already exists")
         }
+        val is_first = Users.id.count().equals(0)
         val name = transaction {
             Users.insert {
                 it[name] = user.name
                 it[amount] = 0
-                it[passwordHash] = hashPassword(password)
+                it[password_hash] = hashPassword(password)
+                it[is_admin] = is_first
             }
         } get Users.name
         return getUserByName(name)!!
@@ -41,7 +42,7 @@ class UserService {
             Users.select {
                 (Users.id eq user.id)
             }.withDistinct().map {
-                it[Users.passwordHash]
+                it[Users.password_hash]
             }.single()
         }
         if (checkPassword(password, passwordHash)) {

@@ -250,14 +250,16 @@ class AppTest {
             val user1 = Users.insert {
                 it[name] = "joel"
                 it[amount] = 20
-                it[passwordHash] = UserService().hashPassword("joel")
+                it[password_hash] = UserService().hashPassword("joel")
+                it[is_admin] = false
             } get Users.id
             user1Id = user1.value
 
             val user2 = Users.insert {
                 it[name] = "jack"
                 it[amount] = 20
-                it[passwordHash] = UserService().hashPassword("jack")
+                it[password_hash] = UserService().hashPassword("jack")
+                it[is_admin] = false
             } get Users.id
             user2Id = user2.value
 

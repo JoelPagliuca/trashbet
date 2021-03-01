@@ -16,6 +16,7 @@ data class User(
         @Serializable(with = UUIDSerializer::class) val id: UUID? = null,
         val name: String,
         val amount: Int,
+        val is_admin: Boolean = false,
 )
 
 @Serializable
@@ -27,7 +28,8 @@ data class UserRegistration(
 object Users: UUIDTable() {
     val name = varchar("name", 255)
     val amount = integer("amount")
-    val passwordHash = varchar("password", 255)
+    val password_hash = varchar("password", 255)
+    val is_admin = bool("is_admin")
 }
 
 @Serializable
