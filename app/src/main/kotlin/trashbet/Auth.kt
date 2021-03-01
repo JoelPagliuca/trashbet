@@ -13,7 +13,7 @@ import java.util.*
 data class UserPrincipal(
         @Serializable(with = UUIDSerializer::class) val id: UUID,
         val name: String,
-        val isAdmin: Boolean = true
+        val admin: Boolean,
 ) : Principal
 
 const val AUTH_COOKIE = "trashbet_session"
@@ -24,7 +24,7 @@ fun Authentication.Configuration.registerAuth() {
         validate { credentials ->
             val user = UserService().loginUser(credentials.name, credentials.password)
             if (user != null) {
-                UserPrincipal(user.id!!, user.name)
+                UserPrincipal(user.id!!, user.name, user.admin)
             } else {
                 null
             }
@@ -43,7 +43,7 @@ class AuthN(config: Configuration) {
             val principal =
                     call.getUserPrincipal() ?: throw AuthorizationException("Missing principal")
             // Apply auth
-            if (!principal.isAdmin) throw AuthorizationException("Admin required")
+            if (!principal.admin) throw AuthorizationException("Admin required")
         }
     }
 

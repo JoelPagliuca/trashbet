@@ -16,7 +16,7 @@ data class User(
         @Serializable(with = UUIDSerializer::class) val id: UUID? = null,
         val name: String,
         val amount: Int,
-        val is_admin: Boolean = false,
+        val admin: Boolean = false,
 )
 
 @Serializable

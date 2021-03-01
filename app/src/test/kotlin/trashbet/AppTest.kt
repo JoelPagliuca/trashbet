@@ -22,7 +22,7 @@ class AppTest {
     private var bet4Id: UUID = UUID.randomUUID()
     private var user1Id: UUID = UUID.randomUUID()
     private var user2Id: UUID = UUID.randomUUID()
-    private val basicAuth = "am9lbDpqb2Vs"
+    private val basicAuth1 = "am9lbDpqb2Vs"
     private val basicAuth2 = "amFjazpqYWNr"
 
     @Test
@@ -34,12 +34,12 @@ class AppTest {
 
     @Test
     fun testUsers() = withTestApplication(Application::main) {
-        with(handleRequest(HttpMethod.Get, "/user", setup={addHeader("Authorization", "Basic $basicAuth")})) {
+        with(handleRequest(HttpMethod.Get, "/user", setup={addHeader("Authorization", "Basic $basicAuth1")})) {
             assertNotNull(response.content)
             val users = Json.decodeFromString<List<User>>(response.content ?: "")
             assertEquals(2, users.size)
         }
-        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth")})) {
+        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth1")})) {
             val user = Json.decodeFromString<User>(response.content ?: "")
             assertEquals(user.name, "joel")
         }
@@ -56,16 +56,18 @@ class AppTest {
             val user = Json.decodeFromString<User>(response.content ?: "")
             assertNotNull(user.amount)
             assertNotNull(user.id)
+            assertFalse(user.admin)
         }
         Unit
     }
 
     @Test
     fun testBets() = withTestApplication(Application::main) {
+        // create new bet
         with(handleRequest(HttpMethod.Post, "/bet", setup = {
             setBody(Json.encodeToString(Bet(description = "test bet", complete = false)))
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertNotNull(response.content)
             assertEquals(HttpStatusCode.Created, response.status())
@@ -73,16 +75,26 @@ class AppTest {
             assertNotNull(bet.id)
             assertFalse(bet.complete)
         }
+        // create bet as non-admin
+        with(handleRequest(HttpMethod.Post, "/bet", setup = {
+            setBody(Json.encodeToString(Bet(description = "test bet", complete = false)))
+            addHeader("Content-Type", "application/json")
+            addHeader("Authorization", "Basic $basicAuth2")
+        })) {
+            assertEquals(HttpStatusCode.Unauthorized, response.status())
+        }
+        // get all bets
         with(handleRequest(HttpMethod.Get, "/bet", setup = {
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertNotNull(response.content)
             assertEquals(HttpStatusCode.OK, response.status())
             val bets = Json.decodeFromString<List<Bet>>(response.content ?: "")
             assertEquals(5, bets.size)
         }
+        // get only complete bets
         with(handleRequest(HttpMethod.Get, "/bet?complete=true", setup = {
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertNotNull(response.content)
             assertEquals(HttpStatusCode.OK, response.status())
@@ -97,7 +109,7 @@ class AppTest {
         with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
             setBody(Json.encodeToString(Wager(amount = 115, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertEquals(HttpStatusCode.BadRequest, response.status())
         }
@@ -105,7 +117,7 @@ class AppTest {
         with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
             setBody(Json.encodeToString(Wager(amount = 0, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertEquals(HttpStatusCode.BadRequest, response.status())
         }
@@ -113,7 +125,7 @@ class AppTest {
         with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
             setBody(Json.encodeToString(Wager(amount = 15, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertEquals(HttpStatusCode.Created, response.status())
         }
@@ -121,7 +133,7 @@ class AppTest {
         with(handleRequest(HttpMethod.Post, "/bet/$bet1Id/wager", setup = {
             setBody(Json.encodeToString(Wager(amount = 1, outcome = false, userId = UUID.randomUUID(), betId = bet1Id)))
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertEquals(HttpStatusCode.BadRequest, response.status())
         }
@@ -130,21 +142,21 @@ class AppTest {
     @Test
     fun testReadWagers() = withTestApplication(Application::main) {
         with(handleRequest(HttpMethod.Get, "/wager/user", setup = {
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertNotNull(response.content)
             val wagers = Json.decodeFromString<List<Wager>>(response.content ?: "")
             assertEquals(2, wagers.size)
         }
         with(handleRequest(HttpMethod.Get, "/wager/user?complete=true", setup = {
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertNotNull(response.content)
             val wagers = Json.decodeFromString<List<Wager>>(response.content ?: "")
             assertEquals(0, wagers.size)
         }
         with(handleRequest(HttpMethod.Get, "/wager/user?complete=false", setup = {
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertNotNull(response.content)
             val wagers = Json.decodeFromString<List<Wager>>(response.content ?: "")
@@ -186,11 +198,11 @@ class AppTest {
         with(handleRequest(HttpMethod.Post, "/bet/$bet3Id/complete", setup = {
             setBody("{\"outcome\":true}")
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertEquals(HttpStatusCode.Accepted, response.status())
         }
-        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth")})) {
+        with(handleRequest(HttpMethod.Get, "/user/me", setup={addHeader("Authorization", "Basic $basicAuth1")})) {
             val user = Json.decodeFromString<User>(response.content ?: "")
             assertEquals("joel", user.name)
             assertEquals(50, user.amount)
@@ -205,7 +217,7 @@ class AppTest {
         with(handleRequest(HttpMethod.Post, "/bet/$bet3Id/complete", setup = {
             setBody("{\"outcome\":false}")
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertEquals(HttpStatusCode.BadRequest, response.status())
         }
@@ -213,7 +225,7 @@ class AppTest {
         with(handleRequest(HttpMethod.Post, "/bet/${UUID.randomUUID()}/complete", setup = {
             setBody("{\"outcome\":false}")
             addHeader("Content-Type", "application/json")
-            addHeader("Authorization", "Basic $basicAuth")
+            addHeader("Authorization", "Basic $basicAuth1")
         })) {
             assertEquals(HttpStatusCode.BadRequest, response.status())
         }
@@ -251,7 +263,7 @@ class AppTest {
                 it[name] = "joel"
                 it[amount] = 20
                 it[password_hash] = UserService().hashPassword("joel")
-                it[admin] = false
+                it[admin] = true
             } get Users.id
             user1Id = user1.value
 

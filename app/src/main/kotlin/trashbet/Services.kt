@@ -63,6 +63,7 @@ class UserService {
             id = row[Users.id].value,
             name = row[Users.name],
             amount = row[Users.amount],
+            admin = row[Users.admin]
     )
 }
 
