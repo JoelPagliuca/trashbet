@@ -2,6 +2,7 @@ package trashbet
 
 import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.mindrot.jbcrypt.BCrypt
 import java.util.*
@@ -140,10 +141,14 @@ class WagerService {
         }
     }
 
-    fun getWagersByUserId(userId: UUID): List<Wager> = transaction {
-        Wagers.select {
+    fun getWagersByUserId(userId: UUID, complete: Boolean?): List<Wager> = transaction {
+        var query = Wagers.innerJoin(Bets).select {
             (Wagers.user eq userId)
-        }.mapNotNull {
+        }
+        complete?.let {
+            query = query.andWhere { (Bets.complete eq complete) }
+        }
+        query.mapNotNull {
             toWager(it)
         }
     }

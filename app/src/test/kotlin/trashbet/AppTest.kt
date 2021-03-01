@@ -136,10 +136,24 @@ class AppTest {
             val wagers = Json.decodeFromString<List<Wager>>(response.content ?: "")
             assertEquals(2, wagers.size)
         }
+        with(handleRequest(HttpMethod.Get, "/wager/user?complete=true", setup = {
+            addHeader("Authorization", "Basic $basicAuth")
+        })) {
+            assertNotNull(response.content)
+            val wagers = Json.decodeFromString<List<Wager>>(response.content ?: "")
+            assertEquals(0, wagers.size)
+        }
+        with(handleRequest(HttpMethod.Get, "/wager/user?complete=false", setup = {
+            addHeader("Authorization", "Basic $basicAuth")
+        })) {
+            assertNotNull(response.content)
+            val wagers = Json.decodeFromString<List<Wager>>(response.content ?: "")
+            assertEquals(2, wagers.size)
+        }
     }
 
     @Test
-    fun testOddsCalculation() =withTestApplication(Application::main) {
+    fun testOddsCalculation() = withTestApplication(Application::main) {
         with(handleRequest(HttpMethod.Get, "/bet", setup = {
             addHeader("Authorization", "Basic $basicAuth2")
         })) {
@@ -290,7 +304,7 @@ class AppTest {
                 it[description] = "complete bet"
                 it[complete] = true
             } get Bets.id
-            bet4Id = bet3.value
+            bet4Id = bet4.value
         }
     }
 }

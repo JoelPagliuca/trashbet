@@ -28,7 +28,7 @@ fun Route.userController(userService: UserService) {
 fun Route.betController(betService: BetService, wagerService: WagerService) {
     route("/bet") {
         get("/") {
-            var filter_complete = call.request.queryParameters["complete"]?.toBoolean()
+            val filter_complete = call.request.queryParameters["complete"]?.toBoolean()
             val bets = betService.getAllBets(filter_complete)
             call.respond(bets)
         }
@@ -71,7 +71,7 @@ fun Route.betController(betService: BetService, wagerService: WagerService) {
                 return@post
             }
             val userId = call.getUserPrincipal()?.id!!
-            val currentWagers = wagerService.getWagersByUserId(userId)
+            val currentWagers = wagerService.getWagersByUserId(userId, null)
             if (currentWagers.any { it.betId == wager.betId }) {
                 call.respond(HttpStatusCode.BadRequest, "user already has wager for bet")
                 return@post
@@ -85,8 +85,9 @@ fun Route.betController(betService: BetService, wagerService: WagerService) {
 fun Route.wagerController(wagerService: WagerService) {
     route("/wager/user") {
         get("/") {
+            val filter_complete = call.request.queryParameters["complete"]?.toBoolean()
             val principal = call.getUserPrincipal()!!
-            val wagers = wagerService.getWagersByUserId(principal.id)
+            val wagers = wagerService.getWagersByUserId(principal.id, filter_complete)
             call.respond(wagers)
         }
     }
