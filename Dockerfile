@@ -14,7 +14,7 @@ RUN rm -rf /app/app/web
 ADD ./gradle /app/gradle
 ADD ./gradlew /app/
 ADD ./settings.gradle.kts /app/
-COPY --from=build-node /app/public/build /app/app/web/public/build
+COPY --from=build-node /app/public /app/app/web/public
 WORKDIR /app
 RUN ./gradlew build
 

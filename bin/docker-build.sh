@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker build -t trashbet-test .
+docker build -t trashbet .
