@@ -1,13 +1,19 @@
 <script>
-  import { Button, Form, FormGroup, InlineLoading, TextInput } from "carbon-components-svelte";
+  import { Button, Form, FormGroup, InlineLoading, TextInput, Toggle } from "carbon-components-svelte";
   import { store } from "../auth.js";
   import { apiFetch } from "../api.js";
   let username = ""
   let password = ""
   let loginPromise = null
+  let signup = false
+  $: action = signup ? "Signup" : "Login"
 
   async function login() {
-    const res = await apiFetch("/login", {
+    let path = "/login"
+    if (signup) {
+      path = "/register"
+    }
+    const res = await apiFetch(path, {
       method: "POST",
       body: JSON.stringify({
         username: username,
@@ -31,13 +37,16 @@
   }
 </script>
 <div>
-  <h2>Login</h2>
+  <h2>{action}</h2>
   <Form on:submit="{handleSubmit}">
     <FormGroup>
       <TextInput labelText="Username" type="text" bind:value={username} />
       <TextInput labelText="Password" type="password" bind:value={password} />
     </FormGroup>
-    <Button type="submit">Login</Button>
+    <FormGroup>
+      <Toggle labelText="Signup" bind:toggled={signup}/>
+    </FormGroup>
+    <Button type="submit">{action}</Button>
     {#await loginPromise}
       <InlineLoading status="active" description="loading..." />
     {:catch error}
