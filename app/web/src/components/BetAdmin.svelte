@@ -11,19 +11,37 @@
     bets = await res.json()
   })
 
-  async function postNewBet(description) {
-    // TODO:
+  let description = ""
+  async function postNewBet() {
+    let body = {
+      description: description,
+      complete: false,
+    }
+    const res = await apiFetch(
+      `/bet`,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      }
+    )
+    if (res.ok) {
+      const b = await res.json()
+      notify(`Created bet ${b.id}`, "success")
+      // TODO: add bet to list
+    } else {
+      notify("Bet creation error", "error")
+    }
   }
 
   async function postCompleteBet(betId, outcome) {
     let body = {
-      outcome: outcome
+      outcome: outcome,
     }
     const res = await apiFetch(
       `/bet/${betId}/complete`,
       {
         method: "POST",
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       }
     )
     if (res.ok) {
@@ -36,9 +54,9 @@
 </script>
 
 <h3>New Bet</h3>
-<Form on:submit={() => {console.log("create")}}>
+<Form on:submit={postNewBet}>
   <FormGroup>
-    <TextInput labelText="lmao"></TextInput>
+    <TextInput labelText="Description" type="text" bind:value={description}></TextInput>
   </FormGroup>
   <Button type="submit" icon={Add20}>Create</Button>
 </Form>
