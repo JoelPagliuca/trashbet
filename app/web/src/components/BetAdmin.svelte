@@ -11,6 +11,10 @@
     bets = await res.json()
   })
 
+  async function postNewBet(description) {
+    // TODO:
+  }
+
   async function postCompleteBet(betId, outcome) {
     let body = {
       outcome: outcome

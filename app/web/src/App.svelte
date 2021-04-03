@@ -6,6 +6,7 @@
     SkipToContent,
     Content,
     HeaderGlobalAction,
+    HeaderNavItem,
   } from "carbon-components-svelte";
   import Logout20 from "carbon-icons-svelte/lib/Logout20";
   import Login from "./components/Login.svelte";
@@ -20,6 +21,8 @@
     $store = null
     location.reload()
   }
+
+  let route = "home"
 </script>
 
 <Theme theme="g90">
@@ -32,6 +35,10 @@
     {#if $store != null}
       <HeaderNav>
         <Points/>
+        {#if $store.admin}
+          <HeaderNavItem text="Home" on:click={() => {route = "home"}}/>
+          <HeaderNavItem text="Bets admin" on:click={() => {route = "betAdmin"}}/>
+        {/if}
       </HeaderNav>
       
       <HeaderUtilities>
@@ -42,7 +49,7 @@
     
   <Content>
     {#if $store != null}
-      <Main/>
+      <Main bind:route/>
     {:else}
       <Login/>
     {/if}
