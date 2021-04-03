@@ -27,7 +27,7 @@
     if (res.ok) {
       const b = await res.json()
       notify(`Created bet ${b.id}`, "success")
-      // TODO: add bet to list
+      bets = [...bets, b]
     } else {
       notify("Bet creation error", "error")
     }
@@ -46,7 +46,14 @@
     )
     if (res.ok) {
       notify("Successful payout", "success")
-      // TODO: remove bet from list
+      for (let i = 0; i < bets.length; i++) {
+        const b = bets[i];
+        if (b.id == betId) {
+          let bets2 = bets
+          bets2.splice(i, 1)
+          bets = bets2
+        }
+      }
     } else {
       notify("Payout error", "error")
     }
