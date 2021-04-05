@@ -32,6 +32,7 @@ dependencies {
     implementation("org.jetbrains.exposed", "exposed-dao", exposed_version)
     implementation("org.jetbrains.exposed", "exposed-jdbc", exposed_version)
     implementation("com.h2database:h2:1.4.199")
+    implementation("org.postgresql:postgresql:42.2.2")
 
     // bcrypt
     implementation("org.mindrot", "jbcrypt", "0.4")

@@ -14,20 +14,28 @@ import kotlinx.serialization.json.Json
 
 
 fun Application.main() {
-    Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;", "org.h2.Driver")
-
     @Suppress("EXPERIMENTAL_API_USAGE")
     val deploymentEnvironment = environment.config.property("ktor.deployment.environment").getString()
+    val dbUser = environment.config.property("ktor.database.user").getString()
+    val dbPass = environment.config.property("ktor.database.pass").getString()
+    val dbDb = environment.config.property("ktor.database.db").getString()
     var authenticationScheme = "basic"
 
     when (deploymentEnvironment) {
         "test" -> {
+            Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;", "org.h2.Driver")
             authenticationScheme = "basic"
         }
         "development" -> {
-            seedData()
+            Database.connect("jdbc:postgresql://localhost:5432/${dbDb}", driver = "org.postgresql.Driver",
+                    user = dbUser, password = dbPass)
+            seedData(true)
         }
-        "production" -> {}
+        "production" -> {
+            Database.connect("jdbc:postgresql://db:5432/${dbDb}", driver = "org.postgresql.Driver",
+                    user = dbUser, password = dbPass)
+            seedData(false)
+        }
     }
 
     install(Authentication) {
