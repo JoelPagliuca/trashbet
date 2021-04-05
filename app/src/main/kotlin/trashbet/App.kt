@@ -16,9 +16,9 @@ import kotlinx.serialization.json.Json
 fun Application.main() {
     @Suppress("EXPERIMENTAL_API_USAGE")
     val deploymentEnvironment = environment.config.property("ktor.deployment.environment").getString()
-    val dbUser = environment.config.property("ktor.database.user").getString()
-    val dbPass = environment.config.property("ktor.database.pass").getString()
-    val dbDb = environment.config.property("ktor.database.db").getString()
+    val dbUser = environment.config.propertyOrNull("ktor.database.user")
+    val dbPass = environment.config.propertyOrNull("ktor.database.pass")
+    val dbDb = environment.config.propertyOrNull("ktor.database.db")
     var authenticationScheme = "basic"
 
     when (deploymentEnvironment) {
@@ -27,13 +27,13 @@ fun Application.main() {
             authenticationScheme = "basic"
         }
         "development" -> {
-            Database.connect("jdbc:postgresql://localhost:5432/${dbDb}", driver = "org.postgresql.Driver",
-                    user = dbUser, password = dbPass)
+            Database.connect("jdbc:postgresql://localhost:5432/${dbDb!!}", driver = "org.postgresql.Driver",
+                    user = dbUser!!.toString(), password = dbPass!!.toString())
             seedData(true)
         }
         "production" -> {
-            Database.connect("jdbc:postgresql://db:5432/${dbDb}", driver = "org.postgresql.Driver",
-                    user = dbUser, password = dbPass)
+            Database.connect("jdbc:postgresql://db:5432/${dbDb!!}", driver = "org.postgresql.Driver",
+                    user = dbUser!!.toString(), password = dbPass!!.toString())
             seedData(false)
         }
     }
