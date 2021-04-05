@@ -27,13 +27,13 @@ fun Application.main() {
             authenticationScheme = "basic"
         }
         "development" -> {
-            Database.connect("jdbc:postgresql://localhost:5432/${dbDb!!}", driver = "org.postgresql.Driver",
-                    user = dbUser!!.toString(), password = dbPass!!.toString())
+            Database.connect("jdbc:postgresql://localhost:5432/${dbDb!!.getString()}", driver = "org.postgresql.Driver",
+                    user = dbUser!!.getString(), password = dbPass!!.getString())
             seedData(true)
         }
         "production" -> {
-            Database.connect("jdbc:postgresql://db:5432/${dbDb!!}", driver = "org.postgresql.Driver",
-                    user = dbUser!!.toString(), password = dbPass!!.toString())
+            Database.connect("jdbc:postgresql://db:5432/${dbDb!!.getString()}", driver = "org.postgresql.Driver",
+                    user = dbUser!!.getString(), password = dbPass!!.getString())
             seedData(false)
         }
     }

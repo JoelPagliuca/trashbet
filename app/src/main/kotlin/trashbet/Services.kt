@@ -28,7 +28,7 @@ class UserService {
         val name = transaction {
             Users.insert {
                 it[name] = user.name
-                it[amount] = 0
+                it[amount] = 20
                 it[password_hash] = hashPassword(password)
                 it[admin] = is_first
             }

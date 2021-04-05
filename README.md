@@ -4,7 +4,12 @@
 <!-- TODO video -->
 
 ## Features
-<!-- TODO -->
+* create bets with a binary outcome
+* place wagers on bets
+* working payouts
+* REST API
+* session auth
+* admin role
 
 ## Stack
 * Front end
@@ -21,13 +26,14 @@
   * compose setup for web and postgres db
 
 ## Deploying
-<!-- TODO -->
 ```sh
 # setup app/web/.env
 ./bin/set-environment.sh
 ./bin/docker-build.sh
 docker-compose up
+# first signup will be an admin
 ```
+app available on port 8080
 
 ## Running locally
 ### Configuration
@@ -39,6 +45,8 @@ TRASHBET_ENVIRONMENT = testing
 
 ### API
 ```sh
+# boot up a local db
+./dev-db-run.sh
 ./gradlew run
 ```
 health [endpoint](http://localhost:8080/health)
