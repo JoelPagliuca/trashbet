@@ -24,7 +24,7 @@ class UserService {
         if (getUserByName(user.name) != null) {
             throw Exception("username already exists")
         }
-        val is_first = Users.id.count().equals(0)
+        val is_first = transaction { Users.selectAll().count() == 0.toLong() }
         val name = transaction {
             Users.insert {
                 it[name] = user.name
