@@ -11,7 +11,7 @@
   import Logout20 from "carbon-icons-svelte/lib/Logout20";
   import Login from "./components/Login.svelte";
   import Theme from "./components/Theme.svelte";
-  import { store } from "./auth.js";
+  import { store } from "./store/auth.js";
   import Main from "./components/Main.svelte";
   import Points from "./components/Points.svelte";
 

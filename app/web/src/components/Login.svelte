@@ -1,6 +1,6 @@
 <script>
   import { Button, Form, FormGroup, InlineLoading, TextInput, Toggle } from "carbon-components-svelte";
-  import { store } from "../auth.js";
+  import { store } from "../store/auth.js";
   import { apiFetch } from "../api.js";
   let username = ""
   let password = ""

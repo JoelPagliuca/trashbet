@@ -1,5 +1,5 @@
 <script>
-  import { store } from "../auth.js";
+  import { store } from "../store/auth.js";
   import { apiFetch } from "../api.js";
   import { onMount } from "svelte";
 
