@@ -1,11 +1,11 @@
 # TrashBet
-[WIP] [SaltyBet](https://www.saltybet.com/) - style betting system but in Kotlin-Ktor
+[SaltyBet](https://www.saltybet.com/) - style betting system but in Kotlin-Ktor
 
-<!-- TODO video -->
+![ui demo](./.github/assets/ui1.png)
 
 ## Features
 * create bets with a binary outcome
-* place wagers on bets
+* place wagers on bets with working odds calculation
 * working payouts
 * REST API
 * session auth
