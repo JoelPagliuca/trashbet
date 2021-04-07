@@ -2,6 +2,7 @@
   import { Form, FormGroup, InlineLoading, Modal, NumberInput, StructuredList, StructuredListBody, StructuredListCell, StructuredListHead, StructuredListRow, StructuredListSkeleton, Toggle } from "carbon-components-svelte";
   import { createEventDispatcher, onMount } from "svelte";
   import { apiFetch } from "../api";
+  import { betStore } from "../store/bet";
   import { notify } from "../store/notification";
 
   const dispatch = createEventDispatcher()
@@ -11,6 +12,7 @@
   onMount(async () => {
     const res = await apiFetch("/bet?complete=false")
     bets = await res.json()
+    betStore.set(bets)
   })
 
   let modalOpen = false
