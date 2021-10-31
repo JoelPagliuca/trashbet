@@ -4,7 +4,8 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public"
+    "start": "sirv public",
+    "prettier": "prettier --write \"src/**/*.js\""
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^16.0.0",
@@ -13,6 +14,7 @@
     "carbon-components-svelte": "^0.26.0",
     "carbon-icons-svelte": "^10.28.0",
     "dotenv": "^8.2.0",
+    "prettier": "^2.4.1",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.0.0",
     "rollup-plugin-livereload": "^2.0.0",
